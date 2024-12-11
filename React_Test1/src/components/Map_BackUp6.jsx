@@ -100,9 +100,13 @@ const Map = () => {
         if (!latestResponse.ok || !mitreResponse.ok) {
           throw new Error("Error fetching API data");
         }
-        const data = await response.json();
 
-        const filteredData = data
+        const latestData = await latestResponse.json();
+        const mitreData = await mitreResponse.json();
+
+        const combinedData = [...latestData, ...mitreData];
+
+        const filteredData = combinedData
           .map((item) => {
             const geoLocation = item._source.GeoLocation || {};
             const agentName = item._source.agent?.name || "";
@@ -129,7 +133,7 @@ const Map = () => {
 
     fetchAttackData();
 
-    const intervalId = setInterval(fetchAttackData, 1000); // Fetch data every 2 seconds
+    const intervalId = setInterval(fetchAttackData, 1000); // Fetch data every second
 
     return () => clearInterval(intervalId); // Cleanup interval
   }, []);
@@ -153,46 +157,8 @@ const Map = () => {
 
         const attackColor = attackTypeColors[type] || "#FFFFFF"; // Default to white if type not found
 
-        // Create a curved line
-        const curve = d3
-          .line()
-          .x((d) => d[0])
-          .y((d) => d[1])
-          .curve(d3.curveBasis);
-
-        const midX = (x + selfX) / 2;
-        const midY = (y + selfY) / 2 - 50;
-
-        const lineData = [
-          [x, y],
-          [midX, midY],
-          [selfX, selfY],
-        ];
-
-        const pathElement = svg
-          .append("path")
-          .datum(lineData)
-          .attr("d", curve)
-          .attr("stroke", "red")
-          .attr("stroke-width", 1)
-          .attr("fill", "none")
-          .attr("stroke-linecap", "round")
-          .attr("stroke-dasharray", function () {
-            return this.getTotalLength();
-          })
-          .attr("stroke-dashoffset", function () {
-            return this.getTotalLength();
-          });
-
-        // Animate the line
-        await new Promise((resolve) => {
-          pathElement
-            .transition()
-            .duration(1500)
-            .ease(d3.easeQuadInOut)
-            .attr("stroke-dashoffset", 0)
-            .on("end", resolve);
-        });
+        // Add a trail group for fading lines
+        const trailGroup = svg.append("g");
 
         // Add the cannonball
         const cannonball = svg
@@ -200,27 +166,44 @@ const Map = () => {
           .attr("cx", x)
           .attr("cy", y)
           .attr("r", 1.5)
-          .attr("fill", "red")
+          .attr("fill", attackColor)
           .style("filter", "url(#glow)");
 
+        // Create a radiating circle from the origin
+        const radiatingCircle = svg
+          .append("circle")
+          .attr("cx", x)
+          .attr("cy", y)
+          .attr("r", 1)
+          .attr("fill", "none")
+          .attr("stroke", attackColor)
+          .attr("stroke-width", 1)
+          .style("opacity", 1);
+
+        radiatingCircle
+          .transition()
+          .duration(1500)
+          .attr("r", 15) // Increase radius for effect
+          .style("opacity", 0) // Fade out
+          .on("end", () => radiatingCircle.remove());
+
         // Create the curve trajectory
-        const midX = (x + selfX) / 2;
-        const midY = Math.min((y + selfY) / 2 - 100, 500); // Adjust for curve height
+        const midX = (x + targetX) / 2;
+        const midY = (y + targetY) / 2 - 100;
 
         await new Promise((resolve) => {
           cannonball
             .transition()
             .duration(2000)
             .ease(d3.easeQuadInOut)
-            .attrTween("cx", function () {
+            .attrTween("transform", function () {
               return function (t) {
-                // Quadratic Bezier curve calculation
                 const currentX =
-                  (1 - t) * (1 - t) * x + 2 * (1 - t) * t * midX + t * t * selfX;
+                  (1 - t) * (1 - t) * x + 2 * (1 - t) * t * midX + t * t * targetX;
                 const currentY =
-                  (1 - t) * (1 - t) * y + 2 * (1 - t) * t * midY + t * t * selfY;
+                  (1 - t) * (1 - t) * y + 2 * (1 - t) * t * midY + t * t * targetY;
 
-                // Add fading trail lines
+                // Add fading trail lines dynamically
                 trailGroup
                   .append("line")
                   .attr("x1", currentX)
@@ -233,32 +216,13 @@ const Map = () => {
                   .duration(200)
                   .style("opacity", 0)
                   .on("end", function () {
-                    d3.select(this).remove(); // Remove line after fading
+                    d3.select(this).remove();
                   });
 
-                return currentX;
-              };
-            })
-            .attrTween("cy", function () {
-              return function (t) {
-                return y + (selfY - y) * t;
+                return `translate(${currentX - x}, ${currentY - y})`;
               };
             })
             .on("end", () => {
-              // Add the target radiating circle
-              svg
-                .append("circle")
-                .attr("cx", targetX)
-                .attr("cy", targetY)
-                .attr("r", 0)
-                .attr("fill", attackColor)
-                .attr("opacity", 0.5)
-                .transition()
-                .duration(1000)
-                .attr("r", 20)
-                .attr("opacity", 0)
-                .remove();
-
               cannonball.transition().duration(500).attr("r", 0).remove();
               resolve();
             });
@@ -267,7 +231,6 @@ const Map = () => {
         // Cleanup trail after animation
         trailGroup.transition().delay(1000).remove();
 
-        // Delay before drawing the next cannonball
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
     };
