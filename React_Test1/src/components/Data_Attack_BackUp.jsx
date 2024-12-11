@@ -6,14 +6,6 @@ import { setupDataAttackerAnimation } from "./JS/data_attackerFun";
 function Data_Attack() {
   const [attackers, setAttackers] = useState([]);
 
-  // ฟังก์ชันสำหรับบวกเวลา 7 ชั่วโมง
-  const addHours = (timestamp, hours) => {
-    if (!timestamp) return "N/A";
-    const date = new Date(timestamp);
-    date.setHours(date.getHours() + hours);
-    return date.toISOString().replace("T", " ").replace("Z", ""); // ปรับรูปแบบเวลาให้เข้าใจง่ายขึ้น
-  };
-
   useEffect(() => {
     const fetchAttackers = async () => {
       try {
@@ -27,16 +19,11 @@ function Data_Attack() {
         const mitreData = mitreResponse.data || [];
 
         // รวมข้อมูลใหม่เข้ากับข้อมูลเก่า โดยเพิ่มข้อมูลใหม่ที่ด้านบน
-        setAttackers((prevAttackers) => {
-          const updatedAttackers = [
-            ...latestData,
-            ...mitreData,
-            ...prevAttackers,
-          ];
-
-          // เก็บข้อมูลไว้สูงสุด 20 รายการ
-          return updatedAttackers.slice(0, 20);
-        });
+        setAttackers((prevAttackers) => [
+          ...latestData,
+          ...mitreData,
+          ...prevAttackers,
+        ]);
       } catch (error) {
         console.error("Error fetching updated attackers data:", error);
       }
@@ -81,7 +68,7 @@ function Data_Attack() {
                 <div key={index} className="row">
                   {/* Timestamp */}
                   <div className="fa timestamp">
-                    {addHours(source["@timestamp"], 7)}
+                    {source["@timestamp"] || "N/A"}
                   </div>
                   {/* Attack Description */}
                   <div className="fa description">
