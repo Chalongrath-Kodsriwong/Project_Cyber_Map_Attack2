@@ -100,11 +100,8 @@ const Map = () => {
         if (!latestResponse.ok || !mitreResponse.ok) {
           throw new Error("Error fetching API data");
         }
-
-        const latestData = await latestResponse.json();
-        const mitreData = await mitreResponse.json();
-
-        const combinedData = [...latestData, ...mitreData];
+        const data = await response.json();
+        console.log("Fetched Attackers Data:", data);
 
         const filteredData = combinedData
           .map((item) => {
@@ -133,7 +130,7 @@ const Map = () => {
 
     fetchAttackData();
 
-    const intervalId = setInterval(fetchAttackData, 2000); // Fetch data every 2 seconds
+    const intervalId = setInterval(fetchAttackData, 1000); // Fetch data every 2 seconds
 
     return () => clearInterval(intervalId); // Cleanup interval
   }, []);
@@ -217,19 +214,69 @@ const Map = () => {
           .attr("fill", "red")
           .attr("opacity", 1);
 
-        // Fade out the dot after animation
-        circle
-          .transition()
-          .duration(1500)
-          .style("opacity", 0)
-          .on("end", () => {
-            circle.remove();
-          });
+        // Animate the cannonball with trail
+        await new Promise((resolve) => {
+          cannonball
+            .transition()
+            .duration(2000)
+            .ease(d3.easeQuadInOut)
+            .attrTween("cx", function () {
+              return function (t) {
+                const currentX = x + (selfX - x) * t;
+                const currentY = y + (selfY - y) * t;
+
+                // Add fading trail lines
+                trailGroup
+                  .append("line")
+                  .attr("x1", currentX)
+                  .attr("y1", currentY)
+                  .attr("x2", currentX + 1)
+                  .attr("y2", currentY + 1)
+                  .attr("stroke", "red")
+                  .attr("stroke-width", 0.5)
+                  .transition()
+                  .duration(200)
+                  .style("opacity", 0)
+                  .on("end", function () {
+                    d3.select(this).remove(); // Remove line after fading
+                  });
+
+                return currentX;
+              };
+            })
+            .attrTween("cy", function () {
+              return function (t) {
+                return y + (selfY - y) * t;
+              };
+            })
+            .on("end", () => {
+              cannonball.transition().duration(500).attr("r", 0).remove();
+              resolve();
+            });
+        });
+
+        // Cleanup trail after animation
+        trailGroup.transition().delay(1000).remove();
 
         // Delay before drawing the next line
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
     };
+
+    // Add glow effect filter
+    const defs = svg.append("defs");
+    const filter = defs.append("filter").attr("id", "glow");
+    filter
+      .append("feGaussianBlur")
+      .attr("stdDeviation", "3")
+      .attr("result", "coloredBlur");
+    filter
+      .append("feMerge")
+      .selectAll("feMergeNode")
+      .data(["coloredBlur", "SourceGraphic"])
+      .enter()
+      .append("feMergeNode")
+      .attr("in", (d) => d);
 
     drawCannonballWithTrail(attackData);
   }, [attackData]);
