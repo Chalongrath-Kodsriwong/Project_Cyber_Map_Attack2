@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { feature } from "topojson-client";
-import topojsonData from "../assets/110m.json"; // Import TopoJSON
+import topojsonData from "../../assets/110m.json"; // Import TopoJSON
 import "./css/Map.css";
 
 const Map = () => {
@@ -19,10 +19,7 @@ const Map = () => {
     const svg = d3
       .select(mapRef.current)
       .attr("viewBox", `0 40 ${width} ${height}`)
-      .attr("preserveAspectRatio", "xMidYMid meet")
-      .style("background-color", "#0a0f1c") // Dark background
-      .style("background-image", "radial-gradient(circle at center, #0a0f1c, #000)")
-      .style("background-size", "cover");
+      .attr("preserveAspectRatio", "xMidYMid meet");
 
     const projection = d3
       .geoNaturalEarth1()
@@ -40,8 +37,8 @@ const Map = () => {
       .enter()
       .append("path")
       .attr("d", path)
-      .attr("fill", "transparent")
-      .attr("stroke", "#1e2a38")
+      .attr("fill", "#f5f5f5")
+      .attr("stroke", "#e0e0e0")
       .attr("stroke-width", 0.5);
 
     const fetchAttackData = async () => {
@@ -80,16 +77,16 @@ const Map = () => {
   useEffect(() => {
     const svg = d3.select(mapRef.current);
 
-    const drawBeam = async (data) => {
+    const drawLine = (data) => {
       const projection = d3
         .geoNaturalEarth1()
         .scale(150)
         .translate([960 / 2, 500 / 2]);
 
-      for (const attack of data) {
+      data.forEach((attack) => {
         const { longitude, latitude } = attack;
 
-        if (!longitude || !latitude || !selfLocation) continue;
+        if (!longitude || !latitude || !selfLocation) return;
 
         const [x, y] = projection([longitude, latitude]);
         const [selfX, selfY] = projection([
@@ -97,78 +94,75 @@ const Map = () => {
           selfLocation.latitude,
         ]);
 
-        // Add glow dots at the source and destination
-        svg
+        // Create a curved line
+        const curve = d3
+          .line()
+          .x((d) => d[0])
+          .y((d) => d[1])
+          .curve(d3.curveBasis);
+
+        const midX = (x + selfX) / 2;
+        const midY = (y + selfY) / 2 - 50;
+
+        const lineData = [
+          [x, y],
+          [midX, midY],
+          [selfX, selfY],
+        ];
+
+        const pathElement = svg
+          .append("path")
+          .datum(lineData)
+          .attr("d", curve)
+          .attr("stroke", "red")
+          .attr("stroke-width", 1)
+          .attr("fill", "none")
+          .attr("stroke-linecap", "round")
+          .attr("stroke-dasharray", function () {
+            return this.getTotalLength();
+          })
+          .attr("stroke-dashoffset", function () {
+            return this.getTotalLength();
+          });
+
+        // Animate the line
+        pathElement
+          .transition()
+          .duration(1500)
+          .ease(d3.easeQuadInOut)
+          .attr("stroke-dashoffset", 0)
+          .on("end", () => {
+            // Fade out and remove the path after animation
+            pathElement
+              .transition()
+              .duration(1000)
+              .style("opacity", 0)
+              .on("end", () => {
+                pathElement.remove();
+              });
+          });
+
+        // Add a red dot for the attacker's location
+        const circle = svg
           .append("circle")
           .attr("cx", x)
           .attr("cy", y)
-          .attr("r", 4)
-          .attr("fill", "cyan")
-          .attr("opacity", 0.8)
+          .attr("r", 2)
+          .attr("fill", "red")
+          .attr("opacity", 1);
+
+        // Fade out the dot after animation
+        circle
           .transition()
-          .duration(2000)
+          .duration(1500)
           .style("opacity", 0)
-          .remove();
-
-        svg
-          .append("circle")
-          .attr("cx", selfX)
-          .attr("cy", selfY)
-          .attr("r", 6)
-          .attr("fill", "cyan")
-          .attr("opacity", 0.8)
-          .transition()
-          .duration(2000)
-          .style("opacity", 0)
-          .remove();
-
-        // Draw the beam (line with glow effect)
-        const line = svg
-          .append("line")
-          .attr("x1", x)
-          .attr("y1", y)
-          .attr("x2", x)
-          .attr("y2", y)
-          .attr("stroke", "cyan")
-          .attr("stroke-width", 2)
-          .attr("stroke-opacity", 0.8)
-          .style("filter", "url(#glow)");
-
-        line
-          .transition()
-          .duration(2000)
-          .ease(d3.easeQuadInOut)
-          .attr("x2", selfX)
-          .attr("y2", selfY)
           .on("end", () => {
-            line
-              .transition()
-              .duration(500)
-              .style("opacity", 0)
-              .remove();
+            circle.remove();
           });
-
-        // Delay before drawing the next beam
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      }
+      });
     };
 
-    // Add glow effect filter
-    const defs = svg.append("defs");
-    const filter = defs.append("filter").attr("id", "glow");
-    filter
-      .append("feGaussianBlur")
-      .attr("stdDeviation", "3")
-      .attr("result", "coloredBlur");
-    filter
-      .append("feMerge")
-      .selectAll("feMergeNode")
-      .data(["coloredBlur", "SourceGraphic"])
-      .enter()
-      .append("feMergeNode")
-      .attr("in", (d) => d);
-
-    drawBeam(attackData);
+    drawLine(attackData);
   }, [attackData]);
 
   return <svg ref={mapRef}></svg>;

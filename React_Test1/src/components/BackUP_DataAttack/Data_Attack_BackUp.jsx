@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./css/Data_Attack.css";
 import axios from "axios";
-import { setupDataAttackerAnimation } from "./JS/data_attackerFun";
+import { setupDataAttackerAnimation } from "../JS/data_attackerFun";
 
 function Data_Attack() {
   const [attackers, setAttackers] = useState([]);
