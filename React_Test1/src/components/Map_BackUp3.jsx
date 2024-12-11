@@ -20,7 +20,9 @@ const Map = () => {
       .select(mapRef.current)
       .attr("viewBox", `0 40 ${width} ${height}`)
       .attr("preserveAspectRatio", "xMidYMid meet")
-      .style("background-color", "#0a0f1c");
+      .style("background-color", "#0a0f1c") // Dark background
+      .style("background-image", "radial-gradient(circle at center, #0a0f1c, #000)")
+      .style("background-size", "cover");
 
     const projection = d3
       .geoNaturalEarth1()
@@ -38,8 +40,8 @@ const Map = () => {
       .enter()
       .append("path")
       .attr("d", path)
-      .attr("fill", "#1e2a38")
-      .attr("stroke", "#35495e")
+      .attr("fill", "transparent")
+      .attr("stroke", "#1e2a38")
       .attr("stroke-width", 0.5);
 
     const fetchAttackData = async () => {
@@ -70,7 +72,7 @@ const Map = () => {
 
     fetchAttackData();
 
-    const intervalId = setInterval(fetchAttackData, 1000); // Fetch data every 2 seconds
+    const intervalId = setInterval(fetchAttackData, 2000); // Fetch data every 2 seconds
 
     return () => clearInterval(intervalId); // Cleanup interval
   }, []);
@@ -78,7 +80,7 @@ const Map = () => {
   useEffect(() => {
     const svg = d3.select(mapRef.current);
 
-    const drawCannonballWithTrail = async (data) => {
+    const drawBeam = async (data) => {
       const projection = d3
         .geoNaturalEarth1()
         .scale(150)
@@ -95,68 +97,78 @@ const Map = () => {
           selfLocation.latitude,
         ]);
 
-        // Add a trail group for fading lines
-        const trailGroup = svg.append("g");
-
-        // Add the cannonball
-        const cannonball = svg
+        // Add glow dots at the source and destination
+        svg
           .append("circle")
           .attr("cx", x)
           .attr("cy", y)
-          .attr("r", 1.5)
-          .attr("fill", "red")
+          .attr("r", 4)
+          .attr("fill", "cyan")
+          .attr("opacity", 0.8)
+          .transition()
+          .duration(2000)
+          .style("opacity", 0)
+          .remove();
+
+        svg
+          .append("circle")
+          .attr("cx", selfX)
+          .attr("cy", selfY)
+          .attr("r", 6)
+          .attr("fill", "cyan")
+          .attr("opacity", 0.8)
+          .transition()
+          .duration(2000)
+          .style("opacity", 0)
+          .remove();
+
+        // Draw the beam (line with glow effect)
+        const line = svg
+          .append("line")
+          .attr("x1", x)
+          .attr("y1", y)
+          .attr("x2", x)
+          .attr("y2", y)
+          .attr("stroke", "cyan")
+          .attr("stroke-width", 2)
+          .attr("stroke-opacity", 0.8)
           .style("filter", "url(#glow)");
 
-        // Animate the cannonball with trail
-        await new Promise((resolve) => {
-          cannonball
-            .transition()
-            .duration(2000)
-            .ease(d3.easeQuadInOut)
-            .attrTween("cx", function () {
-              return function (t) {
-                const currentX = x + (selfX - x) * t;
-                const currentY = y + (selfY - y) * t;
+        line
+          .transition()
+          .duration(2000)
+          .ease(d3.easeQuadInOut)
+          .attr("x2", selfX)
+          .attr("y2", selfY)
+          .on("end", () => {
+            line
+              .transition()
+              .duration(500)
+              .style("opacity", 0)
+              .remove();
+          });
 
-                // Add fading trail lines
-                trailGroup
-                  .append("line")
-                  .attr("x1", currentX)
-                  .attr("y1", currentY)
-                  .attr("x2", currentX + 1)
-                  .attr("y2", currentY + 1)
-                  .attr("stroke", "red")
-                  .attr("stroke-width", 0.5)
-                  .transition()
-                  .duration(200)
-                  .style("opacity", 0)
-                  .on("end", function () {
-                    d3.select(this).remove(); // Remove line after fading
-                  });
-
-                return currentX;
-              };
-            })
-            .attrTween("cy", function () {
-              return function (t) {
-                return y + (selfY - y) * t;
-              };
-            })
-            .on("end", () => {
-              cannonball.transition().duration(500).attr("r", 0).remove();
-              resolve();
-            });
-        });
-
-        // Cleanup trail after animation
-        trailGroup.transition().delay(1000).remove();
-
-        // Delay before drawing the next cannonball
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        // Delay before drawing the next beam
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
     };
 
-    drawCannonballWithTrail(attackData);
+    // Add glow effect filter
+    const defs = svg.append("defs");
+    const filter = defs.append("filter").attr("id", "glow");
+    filter
+      .append("feGaussianBlur")
+      .attr("stdDeviation", "3")
+      .attr("result", "coloredBlur");
+    filter
+      .append("feMerge")
+      .selectAll("feMergeNode")
+      .data(["coloredBlur", "SourceGraphic"])
+      .enter()
+      .append("feMergeNode")
+      .attr("in", (d) => d);
+
+    drawBeam(attackData);
   }, [attackData]);
 
   return <svg ref={mapRef}></svg>;
