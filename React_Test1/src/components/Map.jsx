@@ -49,7 +49,6 @@ const Map = () => {
           throw new Error("Network response was not ok");
         }
         const data = await response.json();
-        console.log("Fetched Attackers Data:", data);
 
         const filteredData = data
           .map((item) => {
@@ -70,7 +69,7 @@ const Map = () => {
 
     fetchAttackData();
 
-    const intervalId = setInterval(fetchAttackData, 1000); // Fetch data every 2 seconds
+    const intervalId = setInterval(fetchAttackData, 1000); // Fetch data every second
 
     return () => clearInterval(intervalId); // Cleanup interval
   }, []);
@@ -107,18 +106,24 @@ const Map = () => {
           .attr("fill", "red")
           .style("filter", "url(#glow)");
 
-        // Animate the cannonball with trail
+        // Create the curve trajectory
+        const midX = (x + selfX) / 2;
+        const midY = Math.min((y + selfY) / 2 - 100, 500); // Adjust for curve height
+
         await new Promise((resolve) => {
           cannonball
             .transition()
             .duration(2000)
             .ease(d3.easeQuadInOut)
-            .attrTween("cx", function () {
+            .attrTween("transform", function () {
               return function (t) {
-                const currentX = x + (selfX - x) * t;
-                const currentY = y + (selfY - y) * t;
+                // Quadratic Bezier curve calculation
+                const currentX =
+                  (1 - t) * (1 - t) * x + 2 * (1 - t) * t * midX + t * t * selfX;
+                const currentY =
+                  (1 - t) * (1 - t) * y + 2 * (1 - t) * t * midY + t * t * selfY;
 
-                // Add fading trail lines
+                // Add fading trail lines dynamically
                 trailGroup
                   .append("line")
                   .attr("x1", currentX)
@@ -131,15 +136,10 @@ const Map = () => {
                   .duration(200)
                   .style("opacity", 0)
                   .on("end", function () {
-                    d3.select(this).remove(); // Remove line after fading
+                    d3.select(this).remove();
                   });
 
-                return currentX;
-              };
-            })
-            .attrTween("cy", function () {
-              return function (t) {
-                return y + (selfY - y) * t;
+                return `translate(${currentX - x}, ${currentY - y})`;
               };
             })
             .on("end", () => {
@@ -155,6 +155,21 @@ const Map = () => {
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
     };
+
+    // Add glow effect filter
+    const defs = svg.append("defs");
+    const filter = defs.append("filter").attr("id", "glow");
+    filter
+      .append("feGaussianBlur")
+      .attr("stdDeviation", "3")
+      .attr("result", "coloredBlur");
+    filter
+      .append("feMerge")
+      .selectAll("feMergeNode")
+      .data(["coloredBlur", "SourceGraphic"])
+      .enter()
+      .append("feMergeNode")
+      .attr("in", (d) => d);
 
     drawCannonballWithTrail(attackData);
   }, [attackData]);
