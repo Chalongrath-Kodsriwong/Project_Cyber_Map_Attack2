@@ -133,7 +133,7 @@ const Map = () => {
 
     fetchAttackData();
 
-    const intervalId = setInterval(fetchAttackData, 1000); // Fetch data every second
+    const intervalId = setInterval(fetchAttackData, 2000); // Fetch data every 2 seconds
 
     return () => clearInterval(intervalId); // Cleanup interval
   }, []);
@@ -153,95 +153,81 @@ const Map = () => {
         if (!longitude || !latitude) continue;
 
         const [x, y] = projection([longitude, latitude]);
-        const [targetX, targetY] = projection([targetLongitude, targetLatitude]);
+        const [selfX, selfY] = projection([
+          selfLocation.longitude,
+          selfLocation.latitude,
+        ]);
 
-        const attackColor = attackTypeColors[type] || "#FFFFFF"; // Default to white if type not found
+        // Create a curved line
+        const curve = d3
+          .line()
+          .x((d) => d[0])
+          .y((d) => d[1])
+          .curve(d3.curveBasis);
 
-        // Add a trail group for fading lines
-        const trailGroup = svg.append("g");
+        const midX = (x + selfX) / 2;
+        const midY = (y + selfY) / 2 - 50;
 
-        // Add the source radiating circle
-        const sourceCircle = svg
-          .append("circle")
-          .attr("cx", x)
-          .attr("cy", y)
-          .attr("r", 0)
-          .attr("fill", attackColor)
-          .attr("opacity", 0.5)
-          .transition()
-          .duration(1000)
-          .attr("r", 20)
-          .attr("opacity", 0)
-          .remove();
+        const lineData = [
+          [x, y],
+          [midX, midY],
+          [selfX, selfY],
+        ];
 
-        // Add the cannonball
-        const cannonball = svg
-          .append("circle")
-          .attr("cx", x)
-          .attr("cy", y)
-          .attr("r", 1.5)
-          .attr("fill", attackColor)
-          .style("filter", "url(#glow)");
+        const pathElement = svg
+          .append("path")
+          .datum(lineData)
+          .attr("d", curve)
+          .attr("stroke", "red")
+          .attr("stroke-width", 1)
+          .attr("fill", "none")
+          .attr("stroke-linecap", "round")
+          .attr("stroke-dasharray", function () {
+            return this.getTotalLength();
+          })
+          .attr("stroke-dashoffset", function () {
+            return this.getTotalLength();
+          });
 
-        // Create the curve trajectory
-        const midX = (x + targetX) / 2;
-        const midY = (y + targetY) / 2 - 100;
-
+        // Animate the line
         await new Promise((resolve) => {
-          cannonball
+          pathElement
             .transition()
-            .duration(2000)
+            .duration(1500)
             .ease(d3.easeQuadInOut)
-            .attrTween("transform", function () {
-              return function (t) {
-                const currentX =
-                  (1 - t) * (1 - t) * x + 2 * (1 - t) * t * midX + t * t * targetX;
-                const currentY =
-                  (1 - t) * (1 - t) * y + 2 * (1 - t) * t * midY + t * t * targetY;
-
-                // Add fading trail lines dynamically
-                trailGroup
-                  .append("line")
-                  .attr("x1", currentX)
-                  .attr("y1", currentY)
-                  .attr("x2", currentX + 1)
-                  .attr("y2", currentY + 1)
-                  .attr("stroke", attackColor)
-                  .attr("stroke-width", 0.5)
-                  .transition()
-                  .duration(200)
-                  .style("opacity", 0)
-                  .on("end", function () {
-                    d3.select(this).remove();
-                  });
-
-                return `translate(${currentX - x}, ${currentY - y})`;
-              };
-            })
-            .on("end", () => {
-              // Add the target radiating circle
-              svg
-                .append("circle")
-                .attr("cx", targetX)
-                .attr("cy", targetY)
-                .attr("r", 0)
-                .attr("fill", attackColor)
-                .attr("opacity", 0.5)
-                .transition()
-                .duration(1000)
-                .attr("r", 20)
-                .attr("opacity", 0)
-                .remove();
-
-              cannonball.transition().duration(500).attr("r", 0).remove();
-              resolve();
-            });
+            .attr("stroke-dashoffset", 0)
+            .on("end", resolve);
         });
 
-        // Cleanup trail after animation
-        trailGroup.transition().delay(1000).remove();
+        // Fade out and remove the path after animation
+        pathElement
+          .transition()
+          .duration(1000)
+          .style("opacity", 0)
+          .on("end", () => {
+            pathElement.remove();
+          });
 
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        // Add a red dot for the attacker's location
+        const circle = svg
+          .append("circle")
+          .attr("cx", x)
+          .attr("cy", y)
+          .attr("r", 2)
+          .attr("fill", "red")
+          .attr("opacity", 1);
+
+        // Fade out the dot after animation
+        circle
+          .transition()
+          .duration(1500)
+          .style("opacity", 0)
+          .on("end", () => {
+            circle.remove();
+          });
+
+        // Delay before drawing the next line
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
     };
 

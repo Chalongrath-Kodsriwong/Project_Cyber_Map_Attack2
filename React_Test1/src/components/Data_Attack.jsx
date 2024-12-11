@@ -45,8 +45,8 @@ function Data_Attack() {
     // ดึงข้อมูลครั้งแรก
     fetchAttackers();
 
-    // ตั้ง Interval เพื่อดึงข้อมูลใหม่ทุก 1 วินาที
-    const intervalId = setInterval(fetchAttackers, 1000);
+    // ตั้ง Interval เพื่อดึงข้อมูลทุก 1 วินาที
+    const intervalId = setInterval(fetchAttackers, 2000);
 
     // ล้าง Interval เมื่อ component ถูก unmount
     return () => clearInterval(intervalId);
