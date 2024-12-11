@@ -10,31 +10,8 @@ const Map = () => {
     latitude: 13.736717, // Fixed latitude (Example: Bangkok, Thailand)
     longitude: 100.523186, // Fixed longitude (Example: Bangkok, Thailand)
   });
-  const [attackData, setAttackData] = useState([]);
-
-  // Fixed Positions for Thailand and Singapore
-  const fixedPositions = [
-    {
-      latitude: 13.736717,
-      longitude: 100.523186,
-      label: "Thailand",
-      color: "#FFA500", // สีส้ม
-    },
-    {
-      latitude: 1.290270,
-      longitude: 103.851959,
-      label: "Singapore",
-      color: "#FF4500", // สีแดงส้ม
-    },
-  ];
-
-  // Colors for attack types
-  const attackTypeColors = {
-    "Web server 400 error code.": "#FF0000", // สีแดง
-    "CMS (WordPress or Joomla) login attempt.": "#00FF00", // สีเขียว
-    "Botnet Activity Detected and Blocked": "#0000FF", // สีน้ำเงิน
-    Unknown: "#FFFF00", // สีเหลือง
-  };
+  const [attackData, setAttackData] = useState([]); // Real-time attack data
+  const [attackColors, setAttackColors] = useState({}); // Store attack type colors
 
   useEffect(() => {
     const width = 960;
@@ -66,32 +43,9 @@ const Map = () => {
       .attr("stroke", "#35495e")
       .attr("stroke-width", 0.5);
 
-    // Add fixed positions for Thailand and Singapore
-    fixedPositions.forEach((position) => {
-      const [fixedX, fixedY] = projection([position.longitude, position.latitude]);
-
-      // Add marker (circle)
-      svg
-        .append("circle")
-        .attr("cx", fixedX)
-        .attr("cy", fixedY)
-        .attr("r", 3)
-        .attr("fill", position.color) // Use specified color
-        .attr("stroke", "#FFFFFF")
-        .attr("stroke-width", 0);
-
-      // Add label
-      svg
-        .append("text")
-        .attr("x", fixedX + 7)
-        .attr("y", fixedY)
-        .text(position.label)
-        .attr("fill", "#FFFFFF")
-        .style("font-size", "12px");
-    });
-
     const fetchAttackData = async () => {
       try {
+        // Fetch data from the two APIs
         const [latestResponse, mitreResponse] = await Promise.all([
           fetch("http://localhost:5000/api/latest_alert"),
           fetch("http://localhost:5000/api/mitre_alert"),
@@ -106,24 +60,31 @@ const Map = () => {
 
         const combinedData = [...latestData, ...mitreData];
 
+        // Map attack types to colors dynamically
+        const newAttackColors = { ...attackColors };
+        combinedData.forEach((item) => {
+          const attackType = item._source?.rule?.description || "Unknown";
+          if (!newAttackColors[attackType]) {
+            newAttackColors[attackType] = d3.schemeCategory10[
+              Object.keys(newAttackColors).length % 10
+            ]; // Use D3 color scheme
+          }
+        });
+
+        setAttackColors(newAttackColors);
+
+        // Filter and map the data to extract latitude and longitude
         const filteredData = combinedData
           .map((item) => {
             const geoLocation = item._source.GeoLocation || {};
-            const agentName = item._source.agent?.name || "";
-            const target = agentName.startsWith("sg")
-              ? fixedPositions[1] // Singapore
-              : fixedPositions[0]; // Default to Thailand
-
             return {
               id: item._id,
               latitude: geoLocation.location?.lat,
               longitude: geoLocation.location?.lon,
-              type: item._source?.rule?.description || "Unknown",
-              targetLatitude: target.latitude,
-              targetLongitude: target.longitude,
+              type: item._source?.rule?.description || "Unknown", // Add attack type
             };
           })
-          .filter((item) => item.latitude && item.longitude);
+          .filter((item) => item.latitude && item.longitude); // Ensure valid latitude/longitude
 
         setAttackData(filteredData);
       } catch (error) {
@@ -136,7 +97,7 @@ const Map = () => {
     const intervalId = setInterval(fetchAttackData, 1000); // Fetch data every second
 
     return () => clearInterval(intervalId); // Cleanup interval
-  }, []);
+  }, [attackColors]);
 
   useEffect(() => {
     const svg = d3.select(mapRef.current);
@@ -148,31 +109,20 @@ const Map = () => {
         .translate([960 / 2, 500 / 2]);
 
       for (const attack of data) {
-        const { longitude, latitude, type, targetLatitude, targetLongitude } = attack;
+        const { longitude, latitude, type } = attack;
 
-        if (!longitude || !latitude) continue;
+        if (!longitude || !latitude || !selfLocation) continue;
 
         const [x, y] = projection([longitude, latitude]);
-        const [targetX, targetY] = projection([targetLongitude, targetLatitude]);
+        const [selfX, selfY] = projection([
+          selfLocation.longitude,
+          selfLocation.latitude,
+        ]);
 
-        const attackColor = attackTypeColors[type] || "#FFFFFF"; // Default to white if type not found
+        const attackColor = attackColors[type] || "red"; // Use color from attack type
 
         // Add a trail group for fading lines
         const trailGroup = svg.append("g");
-
-        // Add the source radiating circle
-        const sourceCircle = svg
-          .append("circle")
-          .attr("cx", x)
-          .attr("cy", y)
-          .attr("r", 0)
-          .attr("fill", attackColor)
-          .attr("opacity", 0.5)
-          .transition()
-          .duration(1000)
-          .attr("r", 20)
-          .attr("opacity", 0)
-          .remove();
 
         // Add the cannonball
         const cannonball = svg
@@ -180,12 +130,12 @@ const Map = () => {
           .attr("cx", x)
           .attr("cy", y)
           .attr("r", 1.5)
-          .attr("fill", attackColor)
+          .attr("fill", attackColor) // Set color dynamically
           .style("filter", "url(#glow)");
 
         // Create the curve trajectory
-        const midX = (x + targetX) / 2;
-        const midY = (y + targetY) / 2 - 100;
+        const midX = (x + selfX) / 2;
+        const midY = Math.min((y + selfY) / 2 - 100, 500); // Adjust for curve height
 
         await new Promise((resolve) => {
           cannonball
@@ -194,10 +144,11 @@ const Map = () => {
             .ease(d3.easeQuadInOut)
             .attrTween("transform", function () {
               return function (t) {
+                // Quadratic Bezier curve calculation
                 const currentX =
-                  (1 - t) * (1 - t) * x + 2 * (1 - t) * t * midX + t * t * targetX;
+                  (1 - t) * (1 - t) * x + 2 * (1 - t) * t * midX + t * t * selfX;
                 const currentY =
-                  (1 - t) * (1 - t) * y + 2 * (1 - t) * t * midY + t * t * targetY;
+                  (1 - t) * (1 - t) * y + 2 * (1 - t) * t * midY + t * t * selfY;
 
                 // Add fading trail lines dynamically
                 trailGroup
@@ -206,7 +157,7 @@ const Map = () => {
                   .attr("y1", currentY)
                   .attr("x2", currentX + 1)
                   .attr("y2", currentY + 1)
-                  .attr("stroke", attackColor)
+                  .attr("stroke", attackColor) // Use color dynamically
                   .attr("stroke-width", 0.5)
                   .transition()
                   .duration(200)
@@ -219,20 +170,6 @@ const Map = () => {
               };
             })
             .on("end", () => {
-              // Add the target radiating circle
-              svg
-                .append("circle")
-                .attr("cx", targetX)
-                .attr("cy", targetY)
-                .attr("r", 0)
-                .attr("fill", attackColor)
-                .attr("opacity", 0.5)
-                .transition()
-                .duration(1000)
-                .attr("r", 20)
-                .attr("opacity", 0)
-                .remove();
-
               cannonball.transition().duration(500).attr("r", 0).remove();
               resolve();
             });
@@ -241,12 +178,28 @@ const Map = () => {
         // Cleanup trail after animation
         trailGroup.transition().delay(1000).remove();
 
+        // Delay before drawing the next cannonball
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
     };
 
+    // Add glow effect filter
+    const defs = svg.append("defs");
+    const filter = defs.append("filter").attr("id", "glow");
+    filter
+      .append("feGaussianBlur")
+      .attr("stdDeviation", "3")
+      .attr("result", "coloredBlur");
+    filter
+      .append("feMerge")
+      .selectAll("feMergeNode")
+      .data(["coloredBlur", "SourceGraphic"])
+      .enter()
+      .append("feMergeNode")
+      .attr("in", (d) => d);
+
     drawCannonballWithTrail(attackData);
-  }, [attackData]);
+  }, [attackData, attackColors]);
 
   return <svg ref={mapRef}></svg>;
 };

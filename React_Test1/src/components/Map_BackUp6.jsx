@@ -160,20 +160,6 @@ const Map = () => {
         // Add a trail group for fading lines
         const trailGroup = svg.append("g");
 
-        // Add the source radiating circle
-        const sourceCircle = svg
-          .append("circle")
-          .attr("cx", x)
-          .attr("cy", y)
-          .attr("r", 0)
-          .attr("fill", attackColor)
-          .attr("opacity", 0.5)
-          .transition()
-          .duration(1000)
-          .attr("r", 20)
-          .attr("opacity", 0)
-          .remove();
-
         // Add the cannonball
         const cannonball = svg
           .append("circle")
@@ -182,6 +168,24 @@ const Map = () => {
           .attr("r", 1.5)
           .attr("fill", attackColor)
           .style("filter", "url(#glow)");
+
+        // Create a radiating circle from the origin
+        const radiatingCircle = svg
+          .append("circle")
+          .attr("cx", x)
+          .attr("cy", y)
+          .attr("r", 1)
+          .attr("fill", "none")
+          .attr("stroke", attackColor)
+          .attr("stroke-width", 1)
+          .style("opacity", 1);
+
+        radiatingCircle
+          .transition()
+          .duration(1500)
+          .attr("r", 15) // Increase radius for effect
+          .style("opacity", 0) // Fade out
+          .on("end", () => radiatingCircle.remove());
 
         // Create the curve trajectory
         const midX = (x + targetX) / 2;
@@ -219,20 +223,6 @@ const Map = () => {
               };
             })
             .on("end", () => {
-              // Add the target radiating circle
-              svg
-                .append("circle")
-                .attr("cx", targetX)
-                .attr("cy", targetY)
-                .attr("r", 0)
-                .attr("fill", attackColor)
-                .attr("opacity", 0.5)
-                .transition()
-                .duration(1000)
-                .attr("r", 20)
-                .attr("opacity", 0)
-                .remove();
-
               cannonball.transition().duration(500).attr("r", 0).remove();
               resolve();
             });

@@ -116,7 +116,7 @@ def get_mitre_alert():
     except requests.exceptions.RequestException as e:
         return jsonify({"error": f"Error fetching MITRE alert: {e}"}), 500
 
-
+# Count log
 @app.route("/api/mitre_techniques", methods=["GET"])
 def get_mitre_techniques():
     try:
