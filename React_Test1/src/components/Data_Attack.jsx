@@ -95,7 +95,7 @@ function Data_Attack() {
                   {/* Agent IP */}
                   <div className="fa agent_ip">{agentIP.srcip || "N/A"}</div>
                   {/* Target Server */}
-                  <div className="fa target_server">{agent.name || "N/As"}</div>
+                  <div className="fa target_server">{agent.name || "N/A"}</div>
                 </div>
               );
             })}
