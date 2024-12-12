@@ -62,7 +62,8 @@ const Map = () => {
       .enter()
       .append("path")
       .attr("d", path)
-      .attr("fill", "#1e2a38")
+      //              #1e2a38
+      .attr("fill", "#9AA6B2")
       .attr("stroke", "#35495e")
       .attr("stroke-width", 0.5);
 
