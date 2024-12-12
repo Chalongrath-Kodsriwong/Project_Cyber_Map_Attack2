@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { feature } from "topojson-client";
 import topojsonData from "../assets/110m.json"; // Import TopoJSON
-import countryAttackData from "../assets/CountryAttack.json"; // Import Attack Data
 import "./css/Map.css";
 
 const Map = () => {
@@ -42,7 +41,7 @@ const Map = () => {
     "Query cache denied (probably config error).": "#5628B4", // สีม่วงเข้ม
     "Simple shell.php command execution.": "#204969", // สีน้ำเงินเข้้ม
     "SQL injection attempt.": "#A4F6A5", // สีเขียวอ่อน
-    "sshd Attempt to login using a non-existent user": "#FF0000", // สีแดง
+    "": "", // สี
     Unknown: "#F8DE22", // สีเหลือง
   };
 
@@ -71,12 +70,11 @@ const Map = () => {
       .attr("class", "tooltip")
       .style("position", "absolute")
       .style("background-color", "white")
-      // .style("border", "1px solid #ccc")
+      .style("border", "1px solid #ccc")
       .style("border-radius", "4px")
-      .style("padding", "2px")
+      .style("padding", "5px")
       .style("pointer-events", "none")
-      .style("opacity", 0)
-      .style("z-index", 22)
+      .style("opacity", 0);
 
     // Draw the world map
     svg
@@ -91,14 +89,12 @@ const Map = () => {
       .on("mouseover", function (event, d) {
         tooltip
           .style("opacity", 1)
-          // .html(`<strong>Country:</strong> ${d.properties.name}`)
-          .html(`${d.properties.name}`)
-          .html(`${d.properties.name}`)
+          .html(`<strong>Country:</strong> ${d.properties.name}`)
           .style("left", `${event.pageX + 10}px`)
           .style("top", `${event.pageY + 10}px`)
-          .style("color", "#39B5E0");
-      
-        d3.select(this).attr("fill", "#FF4D00"); // Highlight color on hover
+          .style("color", "red");
+
+        d3.select(this).attr("fill", "#FFCC00"); // Highlight color on hover
       })
       .on("mousemove", function (event) {
         tooltip
@@ -124,14 +120,14 @@ const Map = () => {
         .attr("stroke", "#FFFFFF")
         .attr("stroke-width", 0);
 
-      // Add label location server
+      // Add label
       svg
         .append("text")
         .attr("x", fixedX + 7)
         .attr("y", fixedY)
         .text(position.label)
         .attr("fill", "#FFFFFF")
-        .style("font-size", "10px");
+        .style("font-size", "12px");
     });
 
     const fetchAttackData = async () => {
