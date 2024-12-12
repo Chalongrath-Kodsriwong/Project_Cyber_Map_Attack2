@@ -96,7 +96,7 @@ function Data_Attack() {
                   {/* Agent ID */}
                   <div className="fa agent_id">{agent.id || "N/A"}</div>
                   {/* Target Server */}
-                  <div className="fa target_server">{agent.name || "N/As"}</div>
+                  <div className="fa target_server">{agent.name || "N/A"}</div>
                 </div>
               );
             })}
