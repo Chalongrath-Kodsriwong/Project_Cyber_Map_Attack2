@@ -36,6 +36,7 @@ svg {
     font-size: 15px;
     color: whitesmoke;
     outline: 1px solid #39B5E0;
+    display: flex;
   }
   
   /* Responsive Design */
