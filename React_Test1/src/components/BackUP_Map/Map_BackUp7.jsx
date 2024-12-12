@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { feature } from "topojson-client";
 import topojsonData from "../assets/110m.json"; // Import TopoJSON
-import countryAttackData from "../assets/CountryAttack.json"; // Import Attack Data
 import "./css/Map.css";
 
 const Map = () => {
@@ -42,7 +41,7 @@ const Map = () => {
     "Query cache denied (probably config error).": "#5628B4", // สีม่วงเข้ม
     "Simple shell.php command execution.": "#204969", // สีน้ำเงินเข้้ม
     "SQL injection attempt.": "#A4F6A5", // สีเขียวอ่อน
-    "sshd Attempt to login using a non-existent user": "#FF0000", // สีแดง
+    "": "", // สี
     Unknown: "#F8DE22", // สีเหลือง
   };
 
@@ -71,12 +70,11 @@ const Map = () => {
       .attr("class", "tooltip")
       .style("position", "absolute")
       .style("background-color", "white")
-      // .style("border", "1px solid #ccc")
+      .style("border", "1px solid #ccc")
       .style("border-radius", "4px")
-      .style("padding", "2px")
+      .style("padding", "5px")
       .style("pointer-events", "none")
-      .style("opacity", 0)
-      .style("z-index", 22)
+      .style("opacity", 0);
 
     // Draw the world map
     svg
@@ -91,14 +89,12 @@ const Map = () => {
       .on("mouseover", function (event, d) {
         tooltip
           .style("opacity", 1)
-          // .html(`<strong>Country:</strong> ${d.properties.name}`)
-          .html(`${d.properties.name}`)
-          .html(`${d.properties.name}`)
+          .html(`<strong>Country:</strong> ${d.properties.name}`)
           .style("left", `${event.pageX + 10}px`)
           .style("top", `${event.pageY + 10}px`)
-          .style("color", "#39B5E0");
-      
-        d3.select(this).attr("fill", "#FF4D00"); // Highlight color on hover
+          .style("color", "red");
+
+        d3.select(this).attr("fill", "#FFCC00"); // Highlight color on hover
       })
       .on("mousemove", function (event) {
         tooltip
@@ -124,14 +120,14 @@ const Map = () => {
         .attr("stroke", "#FFFFFF")
         .attr("stroke-width", 0);
 
-      // Add label location server
+      // Add label
       svg
         .append("text")
         .attr("x", fixedX + 7)
         .attr("y", fixedY)
         .text(position.label)
         .attr("fill", "#FFFFFF")
-        .style("font-size", "10px");
+        .style("font-size", "12px");
     });
 
     const fetchAttackData = async () => {
@@ -144,9 +140,13 @@ const Map = () => {
         if (!latestResponse.ok || !mitreResponse.ok) {
           throw new Error("Error fetching API data");
         }
-        const data = await response.json();
 
-        const filteredData = data
+        const latestData = await latestResponse.json();
+        const mitreData = await mitreResponse.json();
+
+        const combinedData = [...latestData, ...mitreData];
+
+        const filteredData = combinedData
           .map((item) => {
             const geoLocation = item._source.GeoLocation || {};
             const agentName = item._source.agent?.name || "";
@@ -173,7 +173,7 @@ const Map = () => {
 
     fetchAttackData();
 
-    const intervalId = setInterval(fetchAttackData, 1000); // Fetch data every 2 seconds
+    const intervalId = setInterval(fetchAttackData, 1000); // Fetch data every second
 
     return () => clearInterval(intervalId); // Cleanup interval
   }, []);
@@ -197,46 +197,22 @@ const Map = () => {
 
         const attackColor = attackTypeColors[type] || "#FFFFFF"; // Default to white if type not found
 
-        // Create a curved line
-        const curve = d3
-          .line()
-          .x((d) => d[0])
-          .y((d) => d[1])
-          .curve(d3.curveBasis);
+        // Add a trail group for fading lines
+        const trailGroup = svg.append("g");
 
-        const midX = (x + selfX) / 2;
-        const midY = (y + selfY) / 2 - 50;
-
-        const lineData = [
-          [x, y],
-          [midX, midY],
-          [selfX, selfY],
-        ];
-
-        const pathElement = svg
-          .append("path")
-          .datum(lineData)
-          .attr("d", curve)
-          .attr("stroke", "red")
-          .attr("stroke-width", 1)
-          .attr("fill", "none")
-          .attr("stroke-linecap", "round")
-          .attr("stroke-dasharray", function () {
-            return this.getTotalLength();
-          })
-          .attr("stroke-dashoffset", function () {
-            return this.getTotalLength();
-          });
-
-        // Animate the line
-        await new Promise((resolve) => {
-          pathElement
-            .transition()
-            .duration(1500)
-            .ease(d3.easeQuadInOut)
-            .attr("stroke-dashoffset", 0)
-            .on("end", resolve);
-        });
+        // Add the source radiating circle
+        const sourceCircle = svg
+          .append("circle")
+          .attr("cx", x)
+          .attr("cy", y)
+          .attr("r", 0)
+          .attr("fill", attackColor)
+          .attr("opacity", 0.5)
+          .transition()
+          .duration(1000)
+          .attr("r", 20)
+          .attr("opacity", 0)
+          .remove();
 
         // Add the cannonball
         const cannonball = svg
@@ -244,27 +220,26 @@ const Map = () => {
           .attr("cx", x)
           .attr("cy", y)
           .attr("r", 1.5)
-          .attr("fill", "red")
+          .attr("fill", attackColor)
           .style("filter", "url(#glow)");
 
         // Create the curve trajectory
-        const midX = (x + selfX) / 2;
-        const midY = Math.min((y + selfY) / 2 - 100, 500); // Adjust for curve height
+        const midX = (x + targetX) / 2;
+        const midY = (y + targetY) / 2 - 100;
 
         await new Promise((resolve) => {
           cannonball
             .transition()
             .duration(2000)
             .ease(d3.easeQuadInOut)
-            .attrTween("cx", function () {
+            .attrTween("transform", function () {
               return function (t) {
-                // Quadratic Bezier curve calculation
                 const currentX =
-                  (1 - t) * (1 - t) * x + 2 * (1 - t) * t * midX + t * t * selfX;
+                  (1 - t) * (1 - t) * x + 2 * (1 - t) * t * midX + t * t * targetX;
                 const currentY =
-                  (1 - t) * (1 - t) * y + 2 * (1 - t) * t * midY + t * t * selfY;
+                  (1 - t) * (1 - t) * y + 2 * (1 - t) * t * midY + t * t * targetY;
 
-                // Add fading trail lines
+                // Add fading trail lines dynamically
                 trailGroup
                   .append("line")
                   .attr("x1", currentX)
@@ -277,15 +252,10 @@ const Map = () => {
                   .duration(200)
                   .style("opacity", 0)
                   .on("end", function () {
-                    d3.select(this).remove(); // Remove line after fading
+                    d3.select(this).remove();
                   });
 
-                return currentX;
-              };
-            })
-            .attrTween("cy", function () {
-              return function (t) {
-                return y + (selfY - y) * t;
+                return `translate(${currentX - x}, ${currentY - y})`;
               };
             })
             .on("end", () => {
@@ -311,7 +281,6 @@ const Map = () => {
         // Cleanup trail after animation
         trailGroup.transition().delay(1000).remove();
 
-        // Delay before drawing the next cannonball
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
     };
