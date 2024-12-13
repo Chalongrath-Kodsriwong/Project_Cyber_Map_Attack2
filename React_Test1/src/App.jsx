@@ -24,7 +24,7 @@ function App() {
         <Routes>
           {/* เส้นทางสำหรับหน้าแรก */}
           <Route path="/" element={<div className='main_page'>
-            <div className="container">
+            <div className="container" >
             <div className="Map">
                 <Map />
               </div>

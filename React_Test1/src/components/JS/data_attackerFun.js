@@ -26,13 +26,19 @@ export const setupDataAttackerAnimation = () => {
       );
       $(".DataAttacker_log").animate(
         {
-          marginTop: "230px",
+          marginTop: "0px",
         },
         100
       );
       $(".DataAttacker_log").css({
         "z-index": "999"
       })
+      $(".bottom_right").animate(
+        {
+          marginTop: "230px",
+        },
+        100
+      );
       $("")
     } else {
       // Show tableContainer and move DataAttacker_log up
@@ -47,6 +53,12 @@ export const setupDataAttackerAnimation = () => {
         }
       );
       $(".DataAttacker_log").animate(
+        {
+          marginTop: "0px",
+        },
+        100
+      );
+      $(".bottom_right").animate(
         {
           marginTop: "0px",
         },
