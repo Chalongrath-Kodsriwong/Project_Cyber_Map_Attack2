@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { feature } from "topojson-client";
 import topojsonData from "../assets/110m.json"; // Import TopoJSON
-import countryAttackData from "../assets/CountryAttack.json"; // Import Attack Data
 import "./css/Map.css";
+import { setupMapAnimation } from "./JS/map_Fun.js";
 
 const Map = () => {
   const mapRef = useRef();
@@ -18,23 +18,16 @@ const Map = () => {
     {
       latitude: 13.736717,
       longitude: 100.523186,
-      label: "Thailand",
+      label: "TH",
       color: "#FFA500", // สีส้ม
     },
     {
       latitude: 1.290270,
       longitude: 103.851959,
-      label: "Singapore",
+      label: "SG",
       color: "#FF4500", // สีแดงส้ม
     },
   ];
-
-    // Prepare attack data for lookup
-    const attackDataMap = countryAttackData.reduce((acc, entry) => {
-      const [country, value] = Object.entries(entry)[0];
-      acc[country] = value;
-      return acc;
-    }, {});
 
   // Colors for attack types
   const attackTypeColors = {
@@ -50,8 +43,10 @@ const Map = () => {
     "Simple shell.php command execution.": "#204969", // สีน้ำเงินเข้้ม
     "SQL injection attempt.": "#A4F6A5", // สีเขียวอ่อน
     "sshd Attempt to login using a non-existent user": "#FF0000", // สีแดง
+    "Dovecot Authentication Success.": "#15F5BA", // สีเขียว
     Unknown: "#F8DE22", // สีเหลือง
   };
+
 
   useEffect(() => {
     const width = 960;
@@ -61,7 +56,7 @@ const Map = () => {
       .select(mapRef.current)
       .attr("viewBox", `0 40 ${width} ${height}`)
       .attr("preserveAspectRatio", "xMidYMid meet")
-      .style("background-color", "#0a0f1c");
+      // .style("background-color", "#0a0f1c");
 
     const projection = d3
       .geoNaturalEarth1()
@@ -77,13 +72,12 @@ const Map = () => {
       .append("div")
       .attr("class", "tooltip")
       .style("position", "absolute")
-      .style("background-color", "#393E46")
-      // .style("border", "1px solid #ccc")
+      .style("background-color", "#161D6F")
       .style("border-radius", "4px")
-      .style("padding", "5px")
+      .style("padding", "2px")
       .style("pointer-events", "none")
       .style("opacity", 0)
-      .style("z-index", 22)
+      .style("z-index", 22);
 
     // Draw the world map
     svg
@@ -96,18 +90,14 @@ const Map = () => {
       .attr("stroke", "#35495e")
       .attr("stroke-width", 0.5)
       .on("mouseover", function (event, d) {
-        const countryName = d.properties.name;
-        const attackCount = attackDataMap[countryName] || "No data";
-
         tooltip
           .style("opacity", 1)
-          // .html(`<strong>Country:</strong> ${d.properties.name}`)
-          .html(`<strong>${countryName}</strong><p>: ${attackCount}</p>`)
+          .html(`${d.properties.name}`)
           .style("left", `${event.pageX + 10}px`)
           .style("top", `${event.pageY + 10}px`)
           .style("color", "#39B5E0");
-      
-        d3.select(this).attr("fill", "#FF4D00"); // Highlight color on hover
+
+        d3.select(this).attr("fill", "#84F2D6"); // Highlight color on hover
       })
       .on("mousemove", function (event) {
         tooltip
@@ -122,26 +112,76 @@ const Map = () => {
     // Add fixed positions for Thailand and Singapore
     fixedPositions.forEach((position) => {
       const [fixedX, fixedY] = projection([position.longitude, position.latitude]);
-
+    
       // Add marker (circle)
       svg
         .append("circle")
+        .attr("class", "marker-circle") // Add CSS class
         .attr("cx", fixedX)
         .attr("cy", fixedY)
-        .attr("r", 3)
-        .attr("fill", position.color) // Use specified color
-        .attr("stroke", "#FFFFFF")
-        .attr("stroke-width", 0);
-
-      // Add label location server
-      svg
-        .append("text")
-        .attr("x", fixedX + 7)
-        .attr("y", fixedY)
-        .text(position.label)
-        .attr("fill", "#FFFFFF")
-        .style("font-size", "10px");
+        .attr("r", 3.5) // Slightly larger for emphasis
+        .style("z-index", "21")
+        .attr("fill", position.color)
+    
+      // Add text with background rectangle
+      const textPadding = 6; // Padding around the text
+      const fontSize = 8; // Font size for the text
+    
+      // Measure text dimensions
+      const textWidth = position.label.length * fontSize * 1; // Approximate text width
+      const textHeight = fontSize + textPadding; // Text height including padding
+    
+      // Add background rectangle
+      const bgRect = svg
+        .append("rect")
+        .attr("class", "bg_textLo")
+        .attr("x", fixedX + 10) // Offset to the right of the circle
+        .attr("y", fixedY - textHeight / 2.5) // Center the rectangle vertically with the circle
+        .attr("width", textWidth + textPadding)
+        .attr("height", textHeight)
+        .attr("rx", 5) // Rounded corners
+        .attr("ry", 5)
+        .attr("fill", "#1D3557") // Background color
+        .attr("opacity", 0.8) // Slight transparency
+        .style("cursor", "pointer") // Add pointer cursor on hover
+        .style("z-index", "99")
+        .style("transition", "0.5s")
+        .on("mouseenter", () => {
+          textLabel.text(`RUKCOM Server ${position.label}`); // Add "s" to text
+          bgRect
+          .attr("width", 78 + 8)
+        })
+        .on("mouseleave", () => {
+          textLabel.text(position.label); // Revert to original text
+          bgRect
+          .attr("width", textWidth + textPadding)
+        });
+    
+      // Add text label
+      const textLabel = svg
+      .append("text")
+      .attr("class", "text_Lo")
+      .attr("x", fixedX + 15)
+      .attr("y", fixedY + 4)
+      .attr("fill", "#50c3e9")
+      .style("font-size", `${fontSize}px`)
+      .style("font-family", "Arial, sans-serif")
+      .text(position.label)
+      .style("cursor", "pointer") // Add pointer cursor on hover
+      .style("z-index", "99")
+      .on("mouseenter", () => {
+        textLabel.text(`RUKCOM Server ${position.label}`); // Add "s" to text
+        bgRect
+          .attr("width", 78 + 8)
+      })
+      .on("mouseleave", () => {
+        textLabel.text(position.label); // Revert to original text
+        bgRect
+          .attr("width", textWidth + textPadding)
+      });
+    
     });
+    
 
     const fetchAttackData = async () => {
       try {
@@ -285,6 +325,7 @@ const Map = () => {
                   .transition()
                   .duration(200)
                   .style("opacity", 0)
+                  .style("z-index", "21")
                   .on("end", function () {
                     d3.select(this).remove(); // Remove line after fading
                   });
@@ -299,6 +340,7 @@ const Map = () => {
             })
             .on("end", () => {
               // Add the target radiating circle
+              // วงกลมกระจายที่ตำแหน่ง server ที่โดนโจมตี
               svg
                 .append("circle")
                 .attr("cx", targetX)
@@ -308,8 +350,9 @@ const Map = () => {
                 .attr("opacity", 0.5)
                 .transition()
                 .duration(1000)
-                .attr("r", 20)
+                .attr("r", 15)
                 .attr("opacity", 0)
+                .style("z-index", "21")
                 .remove();
 
               cannonball.transition().duration(500).attr("r", 0).remove();
