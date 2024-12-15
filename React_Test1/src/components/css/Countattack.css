@@ -14,6 +14,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
     background-color: #0f3f56;
     color: white; /* สีข้อความ */
     /* width: 50px; 
@@ -29,17 +30,18 @@
         font-size: 15px;
         font-weight: 600;
     }
-    .arrow {
-        display: none; /* ซ่อนลูกศรโดยค่าเริ่มต้น */
-        position: absolute;
-        top: 140px;
-        bottom: 10px; /* จัดตำแหน่งลูกศร */
-        font-size: 12px; /* ขนาดลูกศร */
-        color: #fff;
-        transition: opacity 0.3s ease; /* เพิ่มความนุ่มนวล */
-        transform: rotate(90deg);
-    }
-    
+
+}
+
+.arrow{
+    display: none;
+}
+
+.btn-showhide:hover .arrow{
+    display: inline;
+    transform: rotate(90deg);
+    opacity: 1;
+    color: #00bcd4;
 }
 
 .btn-showhide:hover {
@@ -47,8 +49,8 @@
     background-color: #1c1c1c;
 }
 
-.btn-showhide:hover .arrow{
-    display: inline; /* แสดงลูกศรเมื่อ hover */
-    opacity: 1; /* แสดงลูกศร */
+/* .btn-showhide:hover .arrow{
+    display: inline; 
+    opacity: 1; 
     color: #00bcd4;
-}
+} */

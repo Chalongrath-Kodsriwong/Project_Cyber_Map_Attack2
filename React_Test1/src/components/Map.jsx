@@ -45,6 +45,7 @@ const Map = () => {
     "sshd Attempt to login using a non-existent user": "#FF0000", // สีแดง
     "Dovecot Authentication Success.": "#15F5BA", // สีเขียว
     "Common web attack.": "grey", // สีเขียว
+    "URL too long. Higher than allowed on most browsers. Possible attack.": "#640D5F", // สีม่วง
     Unknown: "#F8DE22", // สีเหลือง
   };
 

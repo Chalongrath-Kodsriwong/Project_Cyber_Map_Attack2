@@ -61,7 +61,8 @@ function Count_Attack() {
         </div>
       </div>
       <div className="btn-showhide">
-        <span className="Text_Attack">Attack Summary <span className="arrow">▼</span></span>
+        <p className="arrow">▼</p>
+        <span className="Text_Attack">Attack Summary</span>
       </div>
     </>
   );

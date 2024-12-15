@@ -8,9 +8,11 @@ function Navbar() {
     <div className="navbar">
       {/* Logo Section */}
       <div className="navbar-logo">
-        <img src={logo} alt="Ruk-Com Logo" />
-        <h1>Cyber Attacker Map</h1>
+        <a href="https://ruk-com.cloud/">
+          <img src={logo} alt="Ruk-Com Logo"/>
+        </a>
       </div>
+        <h1>Cyber Attacker Map</h1>
 
       {/* Menu Section */}
       <div className="menu">

@@ -13,7 +13,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 30px;
+  /* padding: 15px 30px; */
+  padding: 0px 20px;
   background: linear-gradient(90deg, #1B213B, #263859);
 
 
