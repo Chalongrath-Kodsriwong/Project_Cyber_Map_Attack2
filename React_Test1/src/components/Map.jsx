@@ -44,6 +44,7 @@ const Map = () => {
     "SQL injection attempt.": "#A4F6A5", // สีเขียวอ่อน
     "sshd Attempt to login using a non-existent user": "#FF0000", // สีแดง
     "Dovecot Authentication Success.": "#15F5BA", // สีเขียว
+    "Common web attack.": "grey", // สีเขียว
     Unknown: "#F8DE22", // สีเหลือง
   };
 
