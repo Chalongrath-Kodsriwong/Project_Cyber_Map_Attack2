@@ -7,6 +7,8 @@ from collections import Counter
 app = Flask(__name__)
 CORS(app)
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+import os
 
 # เวลาปัจจุบันใน UTC
 now = datetime.utcnow()
@@ -16,10 +18,10 @@ yesterday_midnight = (now - timedelta(days=1)).replace(hour=0, minute=0, second=
 
 
 # Elasticsearch Configuration
-ES_URL = "https://210.246.200.160:9200/wazuh-alerts*/_search"
-ES_URL2 =  "https://210.246.200.160:9200/wazuh-states-vulnerabilities-wazuh/_search" # Replace with your Elasticsearch URL
-ES_USERNAME = "admin"  # Replace with your Elasticsearch username
-ES_PASSWORD = "ITULgIHEhZHb8vxX+"  # Replace with your Elasticsearch password
+ES_URL = os.getenv("ES_URL")
+ES_URL2 = os.getenv("ES_URL2")
+ES_USERNAME = os.getenv("ES_USERNAME")
+ES_PASSWORD = os.getenv("ES_PASSWORD")
 
 @app.route("/api/alerts", methods=["GET"])
 def get_alerts():
