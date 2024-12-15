@@ -27,5 +27,5 @@ dist-ssr
 .env
 
 # Environment Variables
-server_Backup.py
-server_Backup2.py
+# server_Backup.py
+# server_Backup2.py
