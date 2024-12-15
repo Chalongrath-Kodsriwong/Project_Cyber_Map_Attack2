@@ -26,6 +26,6 @@ dist-ssr
 # Environment Variables
 .env
 
-# Environment Variables
-# server_Backup.py
-# server_Backup2.py
+# Ignore specific files
+server_Backup.py
+server_Backup2.py
