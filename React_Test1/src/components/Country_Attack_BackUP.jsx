@@ -2,17 +2,6 @@ import React, { useState, useEffect } from "react";
 import "../components/css/CountryAttack.css";
 import axios from "axios";
 
-// Map country names to image paths
-const countryFlags = {
-  Thailand: "/flags/Thailand.png",
-  "United States": "/flags/United States of America.png",
-  Bulgaria: "flags/bulgaria.png"
-  // Japan: "/flags/japan.png",
-  // Germany: "/flags/germany.png",
-  // France: "/flags/france.png",
-  // Add more countries as needed
-};
-
 function Country_Attack() {
   const [countries, setCountries] = useState([]);
 
@@ -22,16 +11,35 @@ function Country_Attack() {
       const response = await axios.get("http://127.0.0.1:5000/api/today-attacks"); // Replace with your API URL
       const data = response.data;
 
+      // Fetch country flags using an alternative API
+      const countryNames = data.map((item) => item.country);
+      const flagResponses = await Promise.all(
+        countryNames.map(async (name) => {
+          try {
+            const res = await axios.get(`https://restcountries.com/v3.1/name/${name}?fullText=true`);
+            return {
+              name,
+              flag: res.data[0]?.flags?.svg || "",
+            };
+          } catch {
+            return { name, flag: "" }; // Default to empty flag if API call fails
+          }
+        })
+      );
+
       // Combine attack count and flag
-      const formattedCountries = data.map((item) => ({
-        name: item.country,
-        count: item.count,
-        flag: countryFlags[item.country] || "/flags/placeholder.png", // Use placeholder if no match
-      }));
+      const formattedCountries = data.map((item) => {
+        const flagData = flagResponses.find((f) => f.name.toLowerCase() === item.country.toLowerCase());
+        return {
+          name: item.country,
+          count: item.count,
+          flag: flagData?.flag || "https://via.placeholder.com/50", // Default to a placeholder image if no flag is found
+        };
+      });
 
       setCountries(formattedCountries);
     } catch (error) {
-      console.error("Error fetching country data:", error);
+      console.error("Error fetching country data or flags:", error);
     }
   };
 
@@ -40,7 +48,7 @@ function Country_Attack() {
 
     const intervalId = setInterval(() => {
       fetchCountries(); // Fetch data every 1 minute
-    }, 1000); // 60 seconds interval
+    }, 60000); // 60 seconds interval
 
     return () => clearInterval(intervalId); // Cleanup interval on component unmount
   }, []);
@@ -57,7 +65,7 @@ function Country_Attack() {
                 alt={`${country.name} Flag`}
                 className="flag-img"
                 onError={(e) => {
-                  e.target.src = "/flags/placeholder.png"; // Fallback for missing images
+                  e.target.src = "https://via.placeholder.com/50"; // Fallback for missing images
                 }}
               />
               <p className="flag-count">
