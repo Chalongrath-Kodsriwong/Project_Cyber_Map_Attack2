@@ -26,6 +26,9 @@ export const setupClassificationAnimation = () => {
         },
         100
       );
+      $(".Arrow").css({
+        transform: "rotate(-180deg)",
+      });
     } else {
       // Show container-item and move Classification up
       $(".container-item").animate(
@@ -45,8 +48,23 @@ export const setupClassificationAnimation = () => {
         },
         100
       );
+      // Change Arrow rotation for visible state
+      $(".Arrow").css({
+        transform: "rotate(0deg)",
+      });
     }
 
     isHidden = !isHidden; // Toggle visibility state
+  });
+  $(".Classification").mouseenter(function () {
+    $(".Arrow").css({
+      color: "#00bcd4", // Optional: Change color on hover
+    });
+  });
+
+  $(".Classification").mouseleave(function () {
+    $(".Arrow").css({
+      color: "", // Reset color on mouse leave
+    });
   });
 };

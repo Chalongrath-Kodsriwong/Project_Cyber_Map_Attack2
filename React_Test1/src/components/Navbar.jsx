@@ -12,7 +12,7 @@ function Navbar() {
           <img src={logo} alt="Ruk-Com Logo"/>
         </a>
       </div>
-        <h1>Cyber Attacker Map</h1>
+        <h1>Cyber Map Attacker</h1>
 
       {/* Menu Section */}
       <div className="menu">

@@ -46,6 +46,8 @@ const Map = () => {
     "Dovecot Authentication Success.": "#15F5BA", // สีเขียว
     "Common web attack.": "grey", // สีเขียว
     "URL too long. Higher than allowed on most browsers. Possible attack.": "#640D5F", // สีม่วง
+    "Integrity checksum changed.": "#9ABF80", // สีเขียวขี้ม้า
+    "XSS (Cross Site Scripting) attempt.": "#8D0B41", // สีแดงเลือดหมู
     Unknown: "#F8DE22", // สีเหลือง
   };
 
@@ -89,7 +91,7 @@ const Map = () => {
       .append("path")
       .attr("d", path)
       .attr("fill", "#9AA6B2")
-      .attr("stroke", "#35495e")
+      .attr("stroke", "#176B87")
       .attr("stroke-width", 0.5)
       .on("mouseover", function (event, d) {
         tooltip

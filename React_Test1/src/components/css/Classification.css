@@ -70,17 +70,17 @@
   background-color: #1c1c1c; /* Lighter background on hover */
 }
 
-.Classification::after {
-  content: '▼'; /* Add dropdown arrow */
+/* .Classification::after {
+  content: '▼'; 
   font-size: 12px;
   color: #ffffff;
-  margin-left: 10px; /* Add spacing between text and arrow */
-  transition: transform 0.3s ease; /* Smooth transition for rotation */
+  margin-left: 10px; 
+  transition: transform 0.3s ease; 
 }
 
 .Classification:hover::after {
-  color: #00bcd4; /* Change arrow color on hover */
-}
+  color: #00bcd4; 
+} */
 
 .container-item-header {
   font-size: 16px;

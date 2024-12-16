@@ -34,7 +34,7 @@ function Classification() {
   return (
     <div>
       <div className="border">
-        <p className="Classification">Classification</p>
+        <p className="Classification">Classification<span className="Arrow">▼</span></p>
         <div className="container-item">
           {mitreCounts.map((item, index) => (
             <p key={index}>
