@@ -4,13 +4,14 @@ import axios from "axios";
 
 // Map country names to image paths
 const countryFlags = {
-  Thailand: "/flags/Thailand.png",
   "United States": "/flags/United States of America.png",
-  Bulgaria: "flags/bulgaria.png"
-  // Japan: "/flags/japan.png",
-  // Germany: "/flags/germany.png",
-  // France: "/flags/france.png",
-  // Add more countries as needed
+  Bulgaria: "/flags/bulgaria.png",
+  China: "/flags/china.png",
+  Singapore: "/flags/singapore.png",
+  Germany: "/flags/germany.png",
+  Netherlands: "/flags/netherlands.png",
+
+  Default: "/flags/default.png", // Default flag for missing countries
 };
 
 function Country_Attack() {
@@ -19,14 +20,16 @@ function Country_Attack() {
   const fetchCountries = async () => {
     try {
       // Fetch top countries data
-      const response = await axios.get("http://127.0.0.1:5000/api/today-attacks"); // Replace with your API URL
+      const response = await axios.get(
+        "http://127.0.0.1:5000/api/today-attacks"
+      ); // Replace with your API URL
       const data = response.data;
 
-      // Combine attack count and flag
+      // ใช้ข้อมูลจาก API โดยตรง และจับคู่กับ countryFlags
       const formattedCountries = data.map((item) => ({
         name: item.country,
         count: item.count,
-        flag: countryFlags[item.country] || "/flags/placeholder.png", // Use placeholder if no match
+        flag: countryFlags[item.country] || countryFlags["Default"], // เลือก flag ถ้าไม่เจอใช้ Default
       }));
 
       setCountries(formattedCountries);
@@ -46,30 +49,37 @@ function Country_Attack() {
   }, []);
 
   return (
-    <div className="flag-grid-container">
-      <p className="dropdown-title">TOP TARGETED COUNTRIES</p>
-      <div className="flag-grid">
-        {countries.length > 0 ? (
-          countries.map((country, index) => (
-            <div key={index} className="flag-item">
-              <img
-                src={country.flag}
-                alt={`${country.name} Flag`}
-                className="flag-img"
-                onError={(e) => {
-                  e.target.src = "/flags/placeholder.png"; // Fallback for missing images
-                }}
-              />
-              <p className="flag-count">
-                {country.count.toLocaleString()} Attacks
-              </p>
-            </div>
-          ))
-        ) : (
-          <p className="loading-text">Loading data...</p> // Show this while data is being fetched
-        )}
+    <>
+      <div className="btn_hideShow">button</div>
+      <div className="table-container">
+        <strong>TOP TARGETED COUNTRIES</strong>
+        <table className="country-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>COUNTRY</th>
+              <th>COUNT ATTACK</th>
+            </tr>
+          </thead>
+          <tbody>
+            {countries.map((country, index) => (
+              <tr key={index}>
+                <td>{index + 1}</td>
+                <td>
+                  <img
+                    src={country.flag}
+                    alt={`${country.name} Flag`}
+                    onError={(e) => (e.target.src = "/flags/default.png")}
+                  />
+                  {country.name}
+                </td>
+                <td className="Count">{country.count.toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-    </div>
+    </>
   );
 }
 
