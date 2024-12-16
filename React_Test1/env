@@ -1,4 +1,0 @@
-ES_USERNAME=admin
-ES_PASSWORD=ITULgIHEhZHb8vxX+
-ES_URL=https://210.246.200.160:9200/wazuh-alerts*/_search
-ES_URL2=https://210.246.200.160:9200/wazuh-states-vulnerabilities-wazuh/_search
