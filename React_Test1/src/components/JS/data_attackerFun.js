@@ -39,7 +39,9 @@ export const setupDataAttackerAnimation = () => {
         },
         100
       );
-      $("")
+      $(".Arrow").css({
+        transform: "rotate(-180deg)",
+      });
     } else {
       // Show tableContainer and move DataAttacker_log up
       $(".tableContainer").animate(
@@ -64,8 +66,23 @@ export const setupDataAttackerAnimation = () => {
         },
         100
       );
+      // Change Arrow rotation for visible state
+      $(".Arrow").css({
+        transform: "rotate(0deg)",
+      });
     }
 
     isHiddens = !isHiddens; // Toggle visibility state
+  });
+  $(".DataAttacker_log").mouseenter(function () {
+    $(".Arrow").css({
+      color: "#00bcd4", // Optional: Change color on hover
+    });
+  });
+
+  $(".DataAttacker_log").mouseleave(function () {
+    $(".Arrow").css({
+      color: "", // Reset color on mouse leave
+    });
   });
 };
