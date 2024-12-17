@@ -11,8 +11,8 @@ import Map from './components/Map.jsx'
 import Classification from './components/Classification'
 import Country_Attack from './components/Country_Attack'
 import Data_Attack from './components/Data_Attack'
+
 // import Count_Attack from './components/Count_Attack.jsx';
-// import Country_Attacker2 from './components/Country_Attacker2.jsx';
 import "./components/JS/data_attackerFun.js"
 import "./components/JS/Count_Attack_Fun.js"
 
