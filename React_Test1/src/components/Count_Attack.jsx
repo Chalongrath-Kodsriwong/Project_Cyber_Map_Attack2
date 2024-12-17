@@ -53,17 +53,13 @@ function Count_Attack() {
 
   return (
     <>
-      <div className="count-attack-container">
-        <h2>Attack Summary</h2>
-        <div className="attack-summary">
+      {/* <div className="count-attack-container"> */}
+        {/* <h2>Attack Summary</h2> */}
+        {/* <div className="attack-summary"> */}
           <p><strong>Total Attacks Today:</strong> {todayAttacks}</p>
-          <p><strong>Total Attacks:</strong> {totalAttacks}</p>
-        </div>
-      </div>
-      <div className="btn-showhide">
-        <p className="arrow">▼</p>
-        <span className="Text_Attack">Attack Summary</span>
-      </div>
+          {/* <p><strong>Total Attacks:</strong> {totalAttacks}</p> */}
+        {/* </div> */}
+      {/* </div> */}
     </>
   );
 }

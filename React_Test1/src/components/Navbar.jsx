@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './css/Navbar.css';
 import logo from '../assets/image.png';
+import Count_Attack from './Count_Attack';
 
 function Navbar() {
   return (
@@ -12,7 +13,10 @@ function Navbar() {
           <img src={logo} alt="Ruk-Com Logo"/>
         </a>
       </div>
+      <div className="middle_sec" style={{display: "grid", gap: "4px"}}>
         <h1>Cyber Map Attacker</h1>
+        < Count_Attack />
+      </div>
 
       {/* Menu Section */}
       <div className="menu">
