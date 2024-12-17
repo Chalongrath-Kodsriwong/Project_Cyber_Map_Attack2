@@ -58,7 +58,7 @@ const Map = () => {
 
     const svg = d3
       .select(mapRef.current)
-      .attr("viewBox", `20 40 ${width} ${height}`)
+      .attr("viewBox", `20 42 ${width} ${height}`)
       .attr("preserveAspectRatio", "xMidYMid meet")
       // .style("background-color", "#0a0f1c");
 

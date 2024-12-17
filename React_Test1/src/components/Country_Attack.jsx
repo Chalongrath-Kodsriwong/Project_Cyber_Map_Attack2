@@ -50,13 +50,15 @@ function Country_Attack() {
 
   return (
     <>
-      <div className="btn_hideShow">button</div>
+      <div className="btn_hideShow">
+        <p className="text_btn"><p className="Arrow">▼</p> TARGETED COUNTRIES</p>
+      </div>
       <div className="table-container">
         <strong>TOP TARGETED COUNTRIES</strong>
         <table className="country-table">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>NO</th>
               <th>COUNTRY</th>
               <th>COUNT ATTACK</th>
             </tr>
