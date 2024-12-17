@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../components/css/CountryAttack.css";
+import "../components/JS/CountryAttack_Fun.js"; // Import ไว้เพื่อให้ใช้ jQuery ฟังก์ชัน
+import { setupCountryAttackAnimation } from "../components/JS/CountryAttack_Fun.js"; // เพิ่มฟังก์ชันที่ export
 import axios from "axios";
 
 // Map country names to image paths
@@ -10,8 +12,7 @@ const countryFlags = {
   Singapore: "/flags/singapore.png",
   Germany: "/flags/germany.png",
   Netherlands: "/flags/netherlands.png",
-
-  Default: "/flags/default.png", // Default flag for missing countries
+  Default: "/flags/default.png",
 };
 
 function Country_Attack() {
@@ -19,17 +20,13 @@ function Country_Attack() {
 
   const fetchCountries = async () => {
     try {
-      // Fetch top countries data
-      const response = await axios.get(
-        "http://127.0.0.1:5000/api/today-attacks"
-      ); // Replace with your API URL
+      const response = await axios.get("http://127.0.0.1:5000/api/today-attacks");
       const data = response.data;
 
-      // ใช้ข้อมูลจาก API โดยตรง และจับคู่กับ countryFlags
       const formattedCountries = data.map((item) => ({
         name: item.country,
         count: item.count,
-        flag: countryFlags[item.country] || countryFlags["Default"], // เลือก flag ถ้าไม่เจอใช้ Default
+        flag: countryFlags[item.country] || countryFlags["Default"],
       }));
 
       setCountries(formattedCountries);
@@ -39,20 +36,21 @@ function Country_Attack() {
   };
 
   useEffect(() => {
-    fetchCountries(); // Initial fetch
+    fetchCountries();
 
     const intervalId = setInterval(() => {
-      fetchCountries(); // Fetch data every 1 minute
-    }, 1000); // 60 seconds interval
+      fetchCountries();
+    }, 1000);
 
-    return () => clearInterval(intervalId); // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    setupCountryAttackAnimation(); // เรียกใช้ฟังก์ชันที่ import มา
   }, []);
 
   return (
     <>
-      <div className="btn_hideShow">
-        <p className="text_btn"><p className="Arrow">▼</p> TARGETED COUNTRIES</p>
-      </div>
       <div className="table-container">
         <strong>TOP TARGETED COUNTRIES</strong>
         <table className="country-table">
@@ -80,6 +78,10 @@ function Country_Attack() {
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="btn_hideShow">
+        <p className="TextCountry">Country Attacker</p>
+        <p className="Arrows">▼</p>
       </div>
     </>
   );

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./css/Countattack.css";
-import { setupCountAttackAnimation } from './JS/Count_Attack_Fun'; 
+import { setupCountAttackAnimation } from '../JS/Count_Attack_Fun'; 
 
 
 function Count_Attack() {

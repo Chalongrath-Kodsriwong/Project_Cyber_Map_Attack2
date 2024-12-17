@@ -834,5 +834,53 @@ def get_today_attacks():
         return jsonify({"error": f"Error fetching today attacks: {e}"}), 500
 
 
+@app.route("/api/today_mitre_techniques", methods=["GET"])
+def get_mitre_techniques_today():
+    try:
+        
+        
+
+        # Elasticsearch query with date range
+        query = {
+            "size": 0,
+            "query": {
+                "range": {
+                    "@timestamp": {  # ปรับฟิลด์ให้ตรงกับที่ใช้ใน Elasticsearch
+                        "gte": "now/d",  # เริ่มต้นวันนี้
+                        "lte": "now", 
+                        "format": "strict_date_optional_time"
+                    }
+                }
+            },
+            "aggs": {
+                "mitre_techniques": {
+                    "terms": {
+                        "field": "rule.mitre.technique",
+                        "size": 20
+                    }
+                }
+            }
+        }
+
+        response = requests.post(
+            ES_URL,
+            auth=(ES_USERNAME, ES_PASSWORD),
+            headers={"Content-Type": "application/json"},
+            data=json.dumps(query),
+            verify=False
+        )
+
+        response.raise_for_status()
+
+        data = response.json()
+        aggregations = data.get("aggregations", {}).get("mitre_techniques", {}).get("buckets", [])
+
+        # Return the aggregated data
+        return jsonify(aggregations)
+
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": f"Error fetching MITRE techniques: {e}"}), 500
+
+
 if __name__ == "__main__":
     app.run(debug=True)

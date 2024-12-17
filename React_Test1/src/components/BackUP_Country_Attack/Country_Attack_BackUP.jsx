@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../components/css/CountryAttack.css";
+import "../components/cs"
 import axios from "axios";
 
 function Country_Attack() {

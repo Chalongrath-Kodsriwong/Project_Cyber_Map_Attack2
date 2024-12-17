@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../components/css/BackUp_Country_Attack_RightSize.css";
+import "../components/css/RightSize_Country_Attack.css"
 import axios from "axios";
 
 // Map country names to image paths
@@ -14,7 +14,7 @@ const countryFlags = {
   Default: "/flags/default.png", // Default flag for missing countries
 };
 
-function BackUpCountryAttack_RightSize() {
+function RightSize_Country_Attack() {
   const [countries, setCountries] = useState([]);
 
   const fetchCountries = async () => {
@@ -50,12 +50,12 @@ function BackUpCountryAttack_RightSize() {
 
   return (
     <>
-      <div className="btn_hideShow">
-        <p className="text_btn"><p className="Arrow">▼</p> TARGETED COUNTRIES</p>
+      <div className="btn_hideShow2">
+        <p className="text_btn2"><p className="Arrow2">▼</p> TARGETED COUNTRIES</p>
       </div>
-      <div className="table-container">
+      <div className="table-container2">
         <strong>TOP TARGETED COUNTRIES</strong>
-        <table className="country-table">
+        <table className="country-table2">
           <thead>
             <tr>
               <th>NO</th>
@@ -75,7 +75,7 @@ function BackUpCountryAttack_RightSize() {
                   />
                   {country.name}
                 </td>
-                <td className="Count">{country.count.toLocaleString()}</td>
+                <td className="Count2">{country.count.toLocaleString()}</td>
               </tr>
             ))}
           </tbody>
@@ -85,4 +85,4 @@ function BackUpCountryAttack_RightSize() {
   );
 }
 
-export default BackUpCountryAttack_RightSize;
+export default RightSize_Country_Attack;

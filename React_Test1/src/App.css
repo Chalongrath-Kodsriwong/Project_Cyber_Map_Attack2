@@ -61,12 +61,14 @@ html, body {
   overflow-x: 100px;
 }
 
-.toleftsize{
+.leftsize{
   display: flex;
   position: absolute;
+  gap: 0px;
   margin-top: 1px;
   z-index: 1;
-  background-color: #16325B;
+  width: 25rem;
+  /* border: 1px solid red; */
   border-radius: 0px 10px 10px 0px;
 }
 
@@ -100,6 +102,17 @@ html, body {
 
   .bottom_right {
     width: 85%;
+  }
+
+  .leftsize{
+    display: flex;
+    position: absolute;
+    gap: 0px;
+    margin-top: 1px;
+    z-index: 1;
+    width: 20rem;
+    /* border: 1px solid red; */
+    border-radius: 0px 10px 10px 0px;
   }
 }
 

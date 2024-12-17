@@ -1,5 +1,5 @@
 /* Table container adjustments */
-.table-container {
+.table-container2 {
   width: 178%; /* Full width */
   height: 315px; /* Set fixed height for scrolling */
   overflow-y: auto; /* Vertical scrolling inside container */
@@ -16,13 +16,13 @@
 }
 
 /* Table adjustments */
-.country-table {
+.country-table2 {
   width: 100%;
   border-spacing: 0; /* Use spacing instead of collapse */
 }
 
 /* Sticky header */
-.country-table th {
+.country-table2 th {
   position: sticky;
   font-size: 15px;
   top: 0;
@@ -36,25 +36,25 @@
 }
 
 /* Table rows */
-.country-table td {
+.country-table2 td {
   padding: 10px;
   color: #ffffff;
   border-bottom: 1px solid rgba(47, 55, 74, 0.5); /* Semi-transparent row border */
 }
 
-.country-table tr:nth-child(even) {
+.country-table2 tr:nth-child(even) {
   background-color: rgba(0, 129, 129, 0.3); /* Alternate row with transparency */
 }
 
-.country-table tr:nth-child(odd) {
+.country-table2 tr:nth-child(odd) {
   background-color: #0d2633b6; /* Alternate row with transparency */
 }
 
-.Count{
+.Count2{
   text-align: center;
 }
 
-.btn_hideShow{
+.btn_hideShow2{
   /* outline: 1px solid red; */
   display: flex;
   justify-content: center;
@@ -68,14 +68,14 @@
   background-color: #0f3f56;
 }
 
-.text_btn{
+.text_btn2{
   transform: rotate(-90deg);
   font-size: 12px;
 }
 
 
 /* Flag image styling */
-.country-table img {
+.country-table2 img {
   width: 25px;
   height: 25px;
   margin-right: 5px;
@@ -83,19 +83,19 @@
 }
 
 /* Center align for ID column */
-.country-table td:first-child {
+.country-table2 td:first-child {
   text-align: center;
 }
 
-.titles{
+.titles2{
   font-size: 14px;
 }
 
 @media screen and (max-width: 1440px) {
-  .table-container{
+  .table-container2{
     height: 295px;
   }
-  .btn_hideShow{
+  .btn_hideShow2{
     /* outline: 1px solid red; */
     display: flex;
     justify-content: center;
@@ -107,15 +107,15 @@
     border-radius: 5px 0px 0px 5px;
     cursor: pointer;
   }
-  .table-container p{
+  .table-container2 p{
     font-size: 15px;
   }
   /* Sticky header */
-  .country-table th {
+  .country-table2 th {
     font-size: 12px;
   }
   /* Table adjustments */
-  .country-table {
+  .country-table2 {
     width: 100%;
     border-spacing: 0; /* Use spacing instead of collapse */
     font-size: 13px;
@@ -125,21 +125,21 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .country-table th,
-  .country-table td {
+  .country-table2 th,
+  .country-table2 td {
     padding: 8px;
     font-size: 12px;
   }
 }
 
 @media (max-width: 480px) {
-  .country-table th,
-  .country-table td {
+  .country-table2 th,
+  .country-table2 td {
     padding: 6px;
     font-size: 10px;
   }
 
-  .country-table img {
+  .country-table2 img {
     width: 18px;
     height: 18px;
   }
