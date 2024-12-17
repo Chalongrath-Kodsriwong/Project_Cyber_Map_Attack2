@@ -24,6 +24,7 @@
 /* Sticky header */
 .country-table th {
   position: sticky;
+  font-size: 15px;
   top: 0;
   z-index: 10; /* Ensure the header stays on top */
   background-color: rgba(1, 8, 45, 0.952); /* Semi-transparent header */
@@ -53,6 +54,17 @@
   text-align: center;
 }
 
+.btn_hideShow{
+  outline: 1px solid red;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 150px;
+  height: 50px;
+  transform: rotate(-90deg);
+  margin-top: 130px;
+}
+
 
 /* Flag image styling */
 .country-table img {
@@ -65,6 +77,42 @@
 /* Center align for ID column */
 .country-table td:first-child {
   text-align: center;
+}
+
+.titles{
+  font-size: 14px;
+}
+
+@media screen and (max-width: 1440px) {
+  .table-container{
+    height: 295px;
+  }
+  .btn_hideShow{
+    outline: 1px solid red;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80px;
+    height: 30px;
+    transform: rotate(-90deg);
+    margin-top: 130px;
+    position: absolute;
+    right: 15.5rem;
+  }
+  .table-container strong{
+    font-size: 15px;
+  }
+  /* Sticky header */
+  .country-table th {
+    font-size: 12px;
+  }
+  /* Table adjustments */
+  .country-table {
+    width: 100%;
+    border-spacing: 0; /* Use spacing instead of collapse */
+    font-size: 13px;
+  }
+
 }
 
 /* Responsive adjustments */

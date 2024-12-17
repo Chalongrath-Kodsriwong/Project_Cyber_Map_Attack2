@@ -51,7 +51,7 @@ html, body {
   /* background-color: rgba(21, 24, 45, 0.652); */
   display: flex;
   flex-direction: row;
-  gap: 10px;
+  gap: 0px;
   width: 25rem;
   z-index: 2;
   position: absolute;
@@ -68,6 +68,11 @@ html, body {
   z-index: 1;
   background-color: #16325B;
   border-radius: 0px 10px 10px 0px;
+}
+
+.rightsize{
+  /* outline: 1px solid red; */
+  width: 20rem;
 }
 
 /* New media queries for better responsiveness */
@@ -87,7 +92,8 @@ html, body {
   }
 
   .rightsize {
-    width: 11rem;
+    width: 16.9rem;
+    right: 0rem;
   }
 
   .bottom_left {
