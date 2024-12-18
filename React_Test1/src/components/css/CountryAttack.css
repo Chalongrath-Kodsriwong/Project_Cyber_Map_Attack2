@@ -5,7 +5,7 @@
   flex-direction: column;
   align-items: center;
   width: 178%;
-  height: 315px;
+  height: 310px;
   overflow-y: auto;
   background-color: rgba(22, 50, 91, 0.8);
   padding: 0;
@@ -72,7 +72,7 @@
   outline: 1px solid #1c1c1c;
 }
 
-.Arrows {
+.Arrow3 {
   display: none;
   position: absolute;
   transform: rotate(90deg);
@@ -87,7 +87,7 @@
   color: #00bcd4;
 }
 
-.btn_hideShow:hover .Arrows {
+.btn_hideShow:hover .Arrow3 {
   display: inline;
 }
 
@@ -112,9 +112,9 @@
 .btn_hideShow {
   position: absolute;
   left: 20rem;
-  width: 50px;
-  height: 90px;
-  margin-top: 130px;
+  width: 40px;
+  height: 130px;
+  margin-top: 110px;
 }
 
 }

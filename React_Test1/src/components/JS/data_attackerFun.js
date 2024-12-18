@@ -3,6 +3,16 @@ import $ from 'jquery';
 let isHiddens = true; // Tracks visibility of tableContainer
 let isAnimatings = false; // Prevents repeated animations during a single click
 
+function getResponsiveMarginTopOFDataAttack() {
+  if (window.innerWidth >= 1920) {
+    return "280px"; // สำหรับหน้าจอ 1920px
+  } else if (window.innerWidth >= 1440) {
+    return "250px"; // สำหรับหน้าจอ 1440px
+  } else {
+    return "230px"; // ค่ามาตรฐานสำหรับหน้าจออื่นๆ
+  }
+}
+
 export const setupDataAttackerAnimation = () => {
   $(".DataAttacker_log").css({
     "z-index": "999",
@@ -11,6 +21,8 @@ export const setupDataAttackerAnimation = () => {
   $(".DataAttacker_log").click(function () {
     if (isAnimatings) return; // Prevent additional clicks during animation
     isAnimatings = true;
+
+    const marginTopValue2 = getResponsiveMarginTopOFDataAttack(); // ค่าที่ปรับตามขนาดหน้าจอ
 
     if (isHiddens) {
       // Hide tableContainer and move DataAttacker_log down
@@ -35,11 +47,11 @@ export const setupDataAttackerAnimation = () => {
       })
       $(".bottom_right").animate(
         {
-          marginTop: "230px",
+          marginTop: marginTopValue2,
         },
         100
       );
-      $(".Arrow").css({
+      $(".Arrow2").css({
         transform: "rotate(-180deg)",
       });
     } else {
@@ -67,7 +79,7 @@ export const setupDataAttackerAnimation = () => {
         100
       );
       // Change Arrow rotation for visible state
-      $(".Arrow").css({
+      $(".Arrow2").css({
         transform: "rotate(0deg)",
       });
     }
@@ -75,13 +87,13 @@ export const setupDataAttackerAnimation = () => {
     isHiddens = !isHiddens; // Toggle visibility state
   });
   $(".DataAttacker_log").mouseenter(function () {
-    $(".Arrow").css({
+    $(".Arrow2").css({
       color: "#00bcd4", // Optional: Change color on hover
     });
   });
 
   $(".DataAttacker_log").mouseleave(function () {
-    $(".Arrow").css({
+    $(".Arrow2").css({
       color: "", // Reset color on mouse leave
     });
   });

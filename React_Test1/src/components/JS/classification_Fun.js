@@ -3,10 +3,22 @@ import $ from 'jquery';
 let isHidden = true; // Tracks visibility of container-item
 let isAnimating = false; // Prevents repeated animations during a single click
 
+function getResponsiveMarginTopOFClassification() {
+  if (window.innerWidth >= 1920) {
+    return "280px"; // สำหรับหน้าจอ 1920px
+  } else if (window.innerWidth >= 1440) {
+    return "250px"; // สำหรับหน้าจอ 1440px
+  } else {
+    return "230px"; // ค่ามาตรฐานสำหรับหน้าจออื่นๆ
+  }
+}
+
 export const setupClassificationAnimation = () => {
   $(".Classification").click(function () {
     if (isAnimating) return; // Prevent additional clicks during animation
     isAnimating = true;
+
+    const marginTopValue = getResponsiveMarginTopOFClassification(); // ค่าที่ปรับตามขนาดหน้าจอ
 
     if (isHidden) {
       // Hide container-item and move Classification down
@@ -22,11 +34,11 @@ export const setupClassificationAnimation = () => {
       );
       $(".Classification").animate(
         {
-          marginTop: "230px",
+          marginTop: marginTopValue,
         },
         100
       );
-      $(".Arrow").css({
+      $(".Arrow1").css({
         transform: "rotate(-180deg)",
       });
     } else {
@@ -49,7 +61,7 @@ export const setupClassificationAnimation = () => {
         100
       );
       // Change Arrow rotation for visible state
-      $(".Arrow").css({
+      $(".Arrow1").css({
         transform: "rotate(0deg)",
       });
     }
@@ -57,13 +69,13 @@ export const setupClassificationAnimation = () => {
     isHidden = !isHidden; // Toggle visibility state
   });
   $(".Classification").mouseenter(function () {
-    $(".Arrow").css({
+    $(".Arrow1").css({
       color: "#00bcd4", // Optional: Change color on hover
     });
   });
 
   $(".Classification").mouseleave(function () {
-    $(".Arrow").css({
+    $(".Arrow1").css({
       color: "", // Reset color on mouse leave
     });
   });

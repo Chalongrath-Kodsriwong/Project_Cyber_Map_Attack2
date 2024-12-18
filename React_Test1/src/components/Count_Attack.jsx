@@ -56,7 +56,10 @@ function Count_Attack() {
       {/* <div className="count-attack-container"> */}
         {/* <h2>Attack Summary</h2> */}
         {/* <div className="attack-summary"> */}
-          <p><strong>Total Attacks Today:</strong> {todayAttacks}</p>
+
+        <div className="wraper">
+          <p><strong className="Textes">Total Attacks Today:</strong><span className="result">{todayAttacks}</span></p>
+          </div>  
           {/* <p><strong>Total Attacks:</strong> {totalAttacks}</p> */}
         {/* </div> */}
       {/* </div> */}

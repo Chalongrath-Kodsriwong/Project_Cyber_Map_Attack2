@@ -22,7 +22,7 @@ export const setupCountryAttackAnimation = () => {
         }
       );
       $(".btn_hideShow").mouseenter(function () { 
-        $(".Arrows").css({
+        $(".Arrow3").css({
           display: "inline",
           transform: "rotate(-90deg)",
           opacity: "1",
@@ -30,7 +30,7 @@ export const setupCountryAttackAnimation = () => {
         })
       });
       $(".btn_hideShow").mouseleave(function () { 
-        $(".Arrows").css({
+        $(".Arrow3").css({
           display: "none",
           opacity: "0"
         })
@@ -48,7 +48,7 @@ export const setupCountryAttackAnimation = () => {
         }
       );
       $(".btn_hideShow").mouseenter(function () { 
-        $(".Arrows").css({
+        $(".Arrow3").css({
           display: "inline",
           transform: "rotate(90deg)",
           opacity: "1",
@@ -56,7 +56,7 @@ export const setupCountryAttackAnimation = () => {
         })
       });
       $(".btn_hideShow").mouseleave(function () { 
-        $(".Arrows").css({
+        $(".Arrow3").css({
           display: "none",
           opacity: "0"
         })

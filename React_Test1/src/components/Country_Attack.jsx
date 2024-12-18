@@ -80,8 +80,8 @@ function Country_Attack() {
         </table>
       </div>
       <div className="btn_hideShow">
-        <p className="TextCountry">Country Attacker</p>
-        <p className="Arrows">▼</p>
+        <p className="TextCountry">CountryAttacker</p>
+        <p className="Arrow3">▼</p>
       </div>
     </>
   );

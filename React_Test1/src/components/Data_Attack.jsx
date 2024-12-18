@@ -58,7 +58,7 @@ function Data_Attack() {
 
   return (
     <div className="On_container">
-      <p className="DataAttacker_log">DATA ATTACKER<span className="Arrow">▼</span></p>
+      <p className="DataAttacker_log">DATA ATTACKER<span className="Arrow2">▼</span></p>
       <div className="tableContainer">
         <div className="table">
           <div className="header">
@@ -66,6 +66,7 @@ function Data_Attack() {
             <div className="fa description">Attack Type</div>
             <div className="fa country_name">Attack Country</div>
             <div className="fa agent_ip">Attacker IP</div>
+            <div className="fa country_name">Agent ID</div>
             <div className="fa target_server">Target Server</div>
           </div>
           <div className="data">
@@ -90,10 +91,10 @@ function Data_Attack() {
                   <div className="fa country_name">
                     {geoLocation.country_name || "N/A"}
                   </div>
-                  {/* Agent ID */}
-                  <div className="fa agent_id">{agent.id || "N/A"}</div>
                   {/* Agent IP */}
                   <div className="fa agent_ip">{agentIP.srcip || "N/A"}</div>
+                  {/* Agent ID */}
+                  <div className="fa agent_id">{agent.id || "N/A"}</div>
                   {/* Target Server */}
                   <div className="fa target_server">{agent.name || "N/A"}</div>
                 </div>
