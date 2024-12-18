@@ -45,7 +45,15 @@ export const setupDataAttackerAnimation = () => {
       $(".DataAttacker_log").css({
         "z-index": "999"
       })
-      $("")
+      $(".bottom_right").animate(
+        {
+          marginTop: marginTopValue2,
+        },
+        100
+      );
+      $(".Arrow2").css({
+        transform: "rotate(-180deg)",
+      });
     } else {
       // Show tableContainer and move DataAttacker_log up
       $(".tableContainer").animate(
@@ -64,8 +72,29 @@ export const setupDataAttackerAnimation = () => {
         },
         100
       );
+      $(".bottom_right").animate(
+        {
+          marginTop: "0px",
+        },
+        100
+      );
+      // Change Arrow rotation for visible state
+      $(".Arrow2").css({
+        transform: "rotate(0deg)",
+      });
     }
 
     isHiddens = !isHiddens; // Toggle visibility state
+  });
+  $(".DataAttacker_log").mouseenter(function () {
+    $(".Arrow2").css({
+      color: "#00bcd4", // Optional: Change color on hover
+    });
+  });
+
+  $(".DataAttacker_log").mouseleave(function () {
+    $(".Arrow2").css({
+      color: "", // Reset color on mouse leave
+    });
   });
 };

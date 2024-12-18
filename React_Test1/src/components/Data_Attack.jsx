@@ -30,24 +30,39 @@ const attackTypeColors = {
 function Data_Attack() {
   const [attackers, setAttackers] = useState([]);
 
+  const addHours = (timestamp, hours) => {
+    if (!timestamp) return "N/A";
+    const date = new Date(timestamp);
+    date.setHours(date.getHours() + hours);
+    return date.toISOString().replace("T", " ").replace("Z", "");
+  };
+
   useEffect(() => {
     const fetchAttackers = async () => {
       try {
-        // เรียก API ด้วย Axios
-        const response = await axios.get("http://localhost:5000/api/alerts");
-        console.log(response.data); // Debug ข้อมูลที่ได้รับจาก API
-        setAttackers(response.data); // ตั้งค่าข้อมูล attackers จาก response
+        const [latestResponse, mitreResponse] = await Promise.all([
+          axios.get("http://localhost:5000/api/latest_alert"),
+          axios.get("http://localhost:5000/api/mitre_alert"),
+        ]);
+
+        const latestData = latestResponse.data || [];
+        const mitreData = mitreResponse.data || [];
+
+        setAttackers((prevAttackers) => {
+          const updatedAttackers = [
+            ...latestData,
+            ...mitreData,
+            ...prevAttackers,
+          ];
+          return updatedAttackers.slice(0, 20);
+        });
       } catch (error) {
         console.error("Error fetching updated attackers data:", error);
       }
     };
 
     fetchAttackers();
-
-    // ตั้ง Interval เพื่อดึงข้อมูลทุก 1 วินาที
-    const intervalId = setInterval(fetchAttackers, 2000);
-
-    // ล้าง Interval เมื่อ component ถูก unmount
+    const intervalId = setInterval(fetchAttackers, 1000);
     return () => clearInterval(intervalId);
   }, []);
 
@@ -57,15 +72,17 @@ function Data_Attack() {
 
   return (
     <div className="On_container">
-      <p className="DataAttacker_log">Data_Attacker_Log</p>
+      <p className="DataAttacker_log">
+        DATA ATTACKER<span className="Arrow2">▼</span>
+      </p>
       <div className="tableContainer">
         <div className="table">
           <div className="header">
             <div className="fa timestamp">Timestamp</div>
             <div className="fa description">Attack Type</div>
             <div className="fa country_name">Attack Country</div>
-            <div className="fa agent_id">Agent ID</div>
-            <div className="fa agent_ip">Agent IP</div>
+            <div className="fa agent_ip">Attacker IP</div>
+            <div className="fa country_name">Agent ID</div>
             <div className="fa target_server">Target Server</div>
           </div>
           <div className="data">
@@ -82,24 +99,21 @@ function Data_Attack() {
                   <div className="fa timestamp">
                     {addHours(source["@timestamp"], 7)}
                   </div>
-
-                  {/* Attack Description */}
-                  <div className="fa description">
-                    {rule.description || "N/A"}
+                  <div
+                    className="fa description"
+                    style={{
+                      color:
+                        attackTypeColors[attackType] ||
+                        attackTypeColors["Unknown"],
+                    }}
+                  >
+                    {attackType}
                   </div>
-
-                  {/* GeoLocation: Country */}
                   <div className="fa country_name">
                     {geoLocation.country_name || "N/A"}
                   </div>
-
-                  {/* Agent ID */}
+                  <div className="fa agent_ip">{agentIP.srcip || "N/A"}</div>
                   <div className="fa agent_id">{agent.id || "N/A"}</div>
-
-                  {/* Agent IP */}
-                  <div className="fa agent_ip">{agent.ip || "N/A"}</div>
-
-                  {/* Target Server */}
                   <div className="fa target_server">{agent.name || "N/A"}</div>
                 </div>
               );

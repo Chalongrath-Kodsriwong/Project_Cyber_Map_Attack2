@@ -43,6 +43,9 @@ export const setupClassificationAnimation = () => {
         },
         100
       );
+      $(".Arrow1").css({
+        transform: "rotate(-180deg)",
+      });
     } else {
       // Show container-item and move Classification up
       $(".container-item").animate(
@@ -61,8 +64,19 @@ export const setupClassificationAnimation = () => {
         },
         100
       );
+      $(".Arrow1").css({
+        transform: "rotate(0deg)",
+      });
     }
 
     isHidden = !isHidden; // Toggle visibility state
+  });
+
+  $(".Classification").mouseenter(function () {
+    $(".Arrow1").css({ color: "#00bcd4" });
+  });
+
+  $(".Classification").mouseleave(function () {
+    $(".Arrow1").css({ color: "" });
   });
 };
