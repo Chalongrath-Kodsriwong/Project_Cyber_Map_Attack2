@@ -3,7 +3,6 @@ import * as d3 from "d3";
 import { feature } from "topojson-client";
 import topojsonData from "../assets/110m.json"; // Import TopoJSON
 import "./css/Map.css";
-import { setupMapAnimation } from "./JS/map_Fun.js";
 
 const Map = () => {
   const mapRef = useRef();
@@ -11,7 +10,40 @@ const Map = () => {
     latitude: 13.736717, // Fixed latitude (Example: Bangkok, Thailand)
     longitude: 100.523186, // Fixed longitude (Example: Bangkok, Thailand)
   });
-  const [attackData, setAttackData] = useState([]); // Real-time attack data
+  const [attackData, setAttackData] = useState([]);
+
+  // Fixed Positions for Thailand and Singapore
+  const fixedPositions = [
+    {
+      latitude: 13.736717,
+      longitude: 100.523186,
+      label: "Thailand",
+      color: "#FFA500", // สีส้ม
+    },
+    {
+      latitude: 1.290270,
+      longitude: 103.851959,
+      label: "Singapore",
+      color: "#FF4500", // สีแดงส้ม
+    },
+  ];
+
+  // Colors for attack types
+  const attackTypeColors = {
+    "Web server 400 error code.": "#DCFFB7", // สีเหลือง
+    "CMS (WordPress or Joomla) login attempt.": "#00DFA2", // สีเขียว
+    "Botnet Activity Detected and Blocked": "#FF204E", // สีแดงเข้ม
+    "High amount of POST requests in a small period of time (likely bot).": "#FF8D29", // สีส้ม
+    "Multiple web server 400 error codes from same source ip.": "#F35588", // สีชมพู
+    "WAF Alert: Request Blocked.": "#C2FFD9", // สีมิ้น
+    "pure-ftpd: Multiple connection attempts from same source.": "#12CAD6", // สีฟ้าสดใส
+    "pure-ftpd: FTP Authentication success.": "#0FABBC", // สีฟ้าสว่าง
+    "Query cache denied (probably config error).": "#5628B4", // สีม่วงเข้ม
+    "Simple shell.php command execution.": "#204969", // สีน้ำเงินเข้้ม
+    "SQL injection attempt.": "#A4F6A5", // สีเขียวอ่อน
+    "": "", // สี
+    Unknown: "#F8DE22", // สีเหลือง
+  };
 
   useEffect(() => {
     const width = 960;
@@ -20,7 +52,8 @@ const Map = () => {
     const svg = d3
       .select(mapRef.current)
       .attr("viewBox", `0 40 ${width} ${height}`)
-      .attr("preserveAspectRatio", "xMidYMid meet");
+      .attr("preserveAspectRatio", "xMidYMid meet")
+      .style("background-color", "#0a0f1c");
 
     const projection = d3
       .geoNaturalEarth1()
@@ -36,12 +69,12 @@ const Map = () => {
       .append("div")
       .attr("class", "tooltip")
       .style("position", "absolute")
-      .style("background-color", "#161D6F")
+      .style("background-color", "white")
+      .style("border", "1px solid #ccc")
       .style("border-radius", "4px")
-      .style("padding", "2px")
+      .style("padding", "5px")
       .style("pointer-events", "none")
-      .style("opacity", 0)
-      .style("z-index", 22);
+      .style("opacity", 0);
 
     // Draw the world map
     svg
@@ -50,9 +83,28 @@ const Map = () => {
       .enter()
       .append("path")
       .attr("d", path)
-      .attr("fill", "#f5f5f5")
-      .attr("stroke", "#e0e0e0")
-      .attr("stroke-width", 0.5);
+      .attr("fill", "#9AA6B2")
+      .attr("stroke", "#35495e")
+      .attr("stroke-width", 0.5)
+      .on("mouseover", function (event, d) {
+        tooltip
+          .style("opacity", 1)
+          .html(`<strong>Country:</strong> ${d.properties.name}`)
+          .style("left", `${event.pageX + 10}px`)
+          .style("top", `${event.pageY + 10}px`)
+          .style("color", "red");
+
+        d3.select(this).attr("fill", "#FFCC00"); // Highlight color on hover
+      })
+      .on("mousemove", function (event) {
+        tooltip
+          .style("left", `${event.pageX + 10}px`)
+          .style("top", `${event.pageY + 10}px`);
+      })
+      .on("mouseout", function () {
+        tooltip.style("opacity", 0);
+        d3.select(this).attr("fill", "#9AA6B2"); // Reset color
+      });
 
     // Add fixed positions for Thailand and Singapore
     fixedPositions.forEach((position) => {
@@ -158,31 +210,78 @@ const Map = () => {
           .attr("opacity", 0.5)
           .transition()
           .duration(1000)
-          .style("opacity", 0)
-          .on("end", () => {
-            pathElement.remove();
-          });
+          .attr("r", 20)
+          .attr("opacity", 0)
+          .remove();
 
         // Add the cannonball
         const cannonball = svg
           .append("circle")
           .attr("cx", x)
           .attr("cy", y)
-          .attr("r", 2)
-          .attr("fill", "red")
-          .attr("opacity", 1);
+          .attr("r", 1.5)
+          .attr("fill", attackColor)
+          .style("filter", "url(#glow)");
 
-        // Fade out the dot after animation
-        circle
-          .transition()
-          .duration(1500)
-          .style("opacity", 0)
-          .on("end", () => {
-            circle.remove();
-          });
+        // Create the curve trajectory
+        const midX = (x + targetX) / 2;
+        const midY = (y + targetY) / 2 - 100;
 
-        // Delay before drawing the next line
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise((resolve) => {
+          cannonball
+            .transition()
+            .duration(2000)
+            .ease(d3.easeQuadInOut)
+            .attrTween("transform", function () {
+              return function (t) {
+                const currentX =
+                  (1 - t) * (1 - t) * x + 2 * (1 - t) * t * midX + t * t * targetX;
+                const currentY =
+                  (1 - t) * (1 - t) * y + 2 * (1 - t) * t * midY + t * t * targetY;
+
+                // Add fading trail lines dynamically
+                trailGroup
+                  .append("line")
+                  .attr("x1", currentX)
+                  .attr("y1", currentY)
+                  .attr("x2", currentX + 1)
+                  .attr("y2", currentY + 1)
+                  .attr("stroke", attackColor)
+                  .attr("stroke-width", 0.5)
+                  .transition()
+                  .duration(200)
+                  .style("opacity", 0)
+                  .on("end", function () {
+                    d3.select(this).remove();
+                  });
+
+                return `translate(${currentX - x}, ${currentY - y})`;
+              };
+            })
+            .on("end", () => {
+              // Add the target radiating circle
+              svg
+                .append("circle")
+                .attr("cx", targetX)
+                .attr("cy", targetY)
+                .attr("r", 0)
+                .attr("fill", attackColor)
+                .attr("opacity", 0.5)
+                .transition()
+                .duration(1000)
+                .attr("r", 20)
+                .attr("opacity", 0)
+                .remove();
+
+              cannonball.transition().duration(500).attr("r", 0).remove();
+              resolve();
+            });
+        });
+
+        // Cleanup trail after animation
+        trailGroup.transition().delay(1000).remove();
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
     };
 

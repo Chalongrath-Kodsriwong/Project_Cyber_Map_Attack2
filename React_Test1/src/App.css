@@ -7,6 +7,7 @@
 html, body {
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 
 .main_page {
@@ -47,23 +48,35 @@ html, body {
 }
 
 .rightsize {
-  background-color: rgba(21, 24, 45, 0.652);
+  /* background-color: rgba(21, 24, 45, 0.652); */
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 13rem;
+  flex-direction: row;
+  gap: 0px;
+  width: 25rem;
   z-index: 2;
   position: absolute;
-  right: 1rem;
-  overflow-y: auto; /* Enable scroll if content overflows */
+  right: 5rem;
+  /* Enable scroll if content overflows */
+  /* overflow-y: auto;  */
+  overflow-x: 100px;
 }
 
-/* New media queries for better responsiveness */
-@media screen and (max-width: 1980px) and (max-height: 1080px) {
-  .rightsize {
-    width: 12rem;
-  }
+.toleftsize{
+  display: flex;
+  position: absolute;
+  margin-top: 1px;
+  z-index: 1;
+  background-color: #16325B;
+  border-radius: 0px 10px 10px 0px;
 }
+
+
+/* New media queries for better responsiveness */
+/* @media screen and (max-width: 1980px) and (max-height: 1080px) {
+  .rightsize {
+    width: 20rem;
+  }
+} */
 
 @media screen and (max-width: 1440px) {
   .container {
@@ -75,7 +88,10 @@ html, body {
   }
 
   .rightsize {
-    width: 11rem;
+    display: flex;
+    width: 19.5rem;
+    right: 0rem;
+    outline: 1px solid red;
   }
 
   .bottom_left {

@@ -5,6 +5,7 @@ svg {
     max-width: 100%; /* ป้องกันการขยายเกินขนาดของ container */
     display: block; /* ลบ spacing ที่ไม่จำเป็น */
     margin: 0 auto; /* จัดกึ่งกลาง */
+    background-color: #162344;
   }
   
   /* ตั้งค่า background และการแสดงผลของแผนที่ */
@@ -30,9 +31,25 @@ svg {
     width: 100%;
     height: 100%;
   }
-  
+
+  .tooltip{
+    /* outline: 1px solid green; */
+    font-size: 15px;
+    color: whitesmoke;
+    outline: 2px solid #39B5E0;
+    display: flex;
+  }
+
+  .bg_textLo{
+    outline: 1px solid #39B5E0;
+    border-radius: 5px;
+  }
+
+  .text_Lo{
+    color: #50c3e9;
+  }
+
   /* Responsive Design */
-  
   /* สำหรับหน้าจอขนาดเล็กมาก */
   @media (max-width: 576px) {
     .map-container {

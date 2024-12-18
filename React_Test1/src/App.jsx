@@ -11,7 +11,9 @@ import Map from './components/Map.jsx'
 import Classification from './components/Classification'
 import Country_Attack from './components/Country_Attack'
 import Data_Attack from './components/Data_Attack'
+import Count_Attack from './components/Count_Attack.jsx';
 import "./components/JS/data_attackerFun.js"
+import "./components/JS/Count_Attack_Fun.js"
 
 
 function App() {
@@ -24,9 +26,12 @@ function App() {
         <Routes>
           {/* เส้นทางสำหรับหน้าแรก */}
           <Route path="/" element={<div className='main_page'>
-            <div className="container">
+            <div className="container" >
             <div className="Map">
                 <Map />
+            </div>
+              <div className="toleftsize">
+                  <Count_Attack />
               </div>
               <div className="container_bottom">
                   <div className="bottom_left">

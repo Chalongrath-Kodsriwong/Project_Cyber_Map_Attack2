@@ -1,0 +1,73 @@
+/* Table container adjustments */
+.table-container {
+    width: 100%;
+    margin: 0 auto;
+    overflow-x: auto; /* Scrollable for small screens */
+    background-color: #1e2436;
+    padding: 10px;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+  
+  /* Adjust table width and alignment */
+  .country-table {
+    width: 100%; /* Full width */
+    border-collapse: collapse; /* Merge borders */
+  }
+  
+  .country-table th,
+  .country-table td {
+    padding: 10px; /* Padding around text */
+    text-align: left; /* Align text to the left */
+    border: 1px solid #2f374a; /* Border styling */
+    color: #ffffff;
+    font-size: 14px; /* Font size */
+  }
+  
+  .country-table th {
+    background-color: #2b3548; /* Darker header */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .country-table tr:nth-child(even) {
+    background-color: #262D47; /* Alternate row color */
+  }
+  
+  .country-table tr:nth-child(odd) {
+    background-color: #1e2436; /* Alternate row color */
+  }
+  
+  .country-table img {
+    width: 25px; /* Adjust image size */
+    height: 25px;
+    margin-right: 5px; /* Space between flag and text */
+    vertical-align: middle;
+  }
+  
+  .country-table td:first-child {
+    text-align: center; /* Center-align the row numbers */
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .country-table th,
+    .country-table td {
+      padding: 8px; /* Reduce padding for smaller screens */
+      font-size: 12px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .country-table th,
+    .country-table td {
+      padding: 6px; /* Further reduce padding */
+      font-size: 10px;
+    }
+  
+    .country-table img {
+      width: 18px; /* Smaller flag */
+      height: 18px;
+    }
+  }
+  

@@ -58,7 +58,7 @@ function Data_Attack() {
 
   return (
     <div className="On_container">
-      <p className="DataAttacker_log">DATA_ATTACKER_LOG</p>
+      <p className="DataAttacker_log">Data_Attacker_Log</p>
       <div className="tableContainer">
         <div className="table">
           <div className="header">
