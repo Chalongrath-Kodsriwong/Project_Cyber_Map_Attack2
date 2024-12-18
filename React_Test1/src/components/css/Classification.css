@@ -70,6 +70,10 @@
   background-color: #1c1c1c; /* Lighter background on hover */
 }
 
+/* .btnOfSwitch{
+  background-color: rgba(0, 187, 212, 0.39);
+} */
+
 /* .Classification::after {
   content: '▼'; 
   font-size: 12px;

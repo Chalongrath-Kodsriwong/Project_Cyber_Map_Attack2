@@ -1,31 +1,31 @@
 import React, { useEffect, useState } from "react";
 import "./css/Classification.css";
-import axios from "axios"; // ใช้ Axios สำหรับการดึงข้อมูล
+import axios from "axios";
 import { setupClassificationAnimation } from "./JS/classification_Fun";
 
 function Classification() {
   const [mitreCounts, setMitreCounts] = useState([]);
+  const [showToday, setShowToday] = useState(true);
+
+  const fetchMitreTechniques = async (endpoint) => {
+    try {
+      const response = await axios.get(endpoint);
+      const mitreData = response.data;
+      setMitreCounts(mitreData);
+    } catch (error) {
+      console.error("Error fetching MITRE techniques data:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchMitreTechniques = async () => {
-      try {
-        console.log("Fetching MITRE techniques...");
-        const response = await axios.get("http://localhost:5000/api/mitre_techniques");
+    const endpoint = showToday
+      ? "http://localhost:5000/api/today_mitre_techniques"
+      : "http://localhost:5000/api/mitre_techniques";
+    fetchMitreTechniques(endpoint);
 
-        const mitreData = response.data;
-        console.log("Fetched MITRE techniques:", mitreData);
-
-        setMitreCounts(mitreData);
-      } catch (error) {
-        console.error("Error fetching MITRE techniques data:", error);
-      }
-    };
-
-    fetchMitreTechniques();
-    const intervalId = setInterval(fetchMitreTechniques, 5000);
-
+    const intervalId = setInterval(() => fetchMitreTechniques(endpoint), 5000);
     return () => clearInterval(intervalId);
-  }, []);
+  }, [showToday]);
 
   useEffect(() => {
     setupClassificationAnimation();
@@ -34,11 +34,29 @@ function Classification() {
   return (
     <div>
       <div className="border">
-        <p className="Classification">Classification<span className="Arrow1">▼</span></p>
+        <p className="Classification" style={{ cursor: "pointer" }}>
+          Classification{" "}
+          <p
+            className="btnOfSwitch"
+            style={{ color: "grey", fontSize: "12px", cursor: "pointer"}}
+            onClick={(e) => {
+              e.stopPropagation(); // ป้องกันไม่ให้ event ส่งไปที่ .Classification
+              setShowToday((prev) => !prev);
+            }}
+          >
+            {showToday ? "Today" : "All"} &#10226;
+          </p>
+          <span className="Arrow1">▼</span>
+        </p>
         <div className="container-item">
           {mitreCounts.map((item, index) => (
-            <p key={index}>
-              {item.key}: {item.doc_count}
+            <p
+              key={index}
+              className="items"
+              style={{ display: "flex", justifyContent: "space-between" }}
+            >
+              <span className="key">{item.key}:</span>
+              <span className="count">{item.doc_count.toLocaleString()}</span>
             </p>
           ))}
         </div>

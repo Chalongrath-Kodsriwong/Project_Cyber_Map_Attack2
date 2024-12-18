@@ -7,8 +7,6 @@ from collections import Counter
 app = Flask(__name__)
 CORS(app)
 from datetime import datetime, timedelta
-from dotenv import load_dotenv
-import os
 
 # เวลาปัจจุบันใน UTC
 now = datetime.utcnow()
@@ -17,7 +15,13 @@ now = datetime.utcnow()
 yesterday_midnight = (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
 
 
-# Elasticsearch Configuration
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Access environment variables
 ES_URL = os.getenv("ES_URL")
 ES_URL2 = os.getenv("ES_URL2")
 ES_USERNAME = os.getenv("ES_USERNAME")
@@ -726,7 +730,7 @@ def get_mitre_alert():
     except requests.exceptions.RequestException as e:
         return jsonify({"error": f"Error fetching MITRE alert: {e}"}), 500
 
-
+# Count log
 @app.route("/api/mitre_techniques", methods=["GET"])
 def get_mitre_techniques():
     try:
@@ -834,6 +838,9 @@ def get_today_attacks():
         return jsonify({"error": f"Error fetching today attacks: {e}"}), 500
 
 
+
+
+
 @app.route("/api/today_mitre_techniques", methods=["GET"])
 def get_mitre_techniques_today():
     try:
@@ -856,7 +863,7 @@ def get_mitre_techniques_today():
                 "mitre_techniques": {
                     "terms": {
                         "field": "rule.mitre.technique",
-                        "size": 20
+                        "size": 100
                     }
                 }
             }
@@ -880,6 +887,81 @@ def get_mitre_techniques_today():
 
     except requests.exceptions.RequestException as e:
         return jsonify({"error": f"Error fetching MITRE techniques: {e}"}), 500
+
+
+
+
+@app.route("/api/top_rule_descriptions", methods=["GET"])
+def get_top_rule_descriptions():
+    try:
+       
+
+        # Elasticsearch Query
+        query = {
+            "aggs": {
+                "2": {
+                    "terms": {
+                        "field": "rule.description",
+                        "order": {
+                            "_count": "desc"
+                        },
+                        "size": 100  # ดึง 5 อันดับแรก
+                    }
+                }
+            },
+            "size": 0,
+            "stored_fields": ["*"],
+            "docvalue_fields": [
+                {"field": "timestamp", "format": "date_time"}
+            ],
+            "_source": {
+                "excludes": ["@timestamp"]
+            },
+            "query": {
+                "bool": {
+                    "filter": [
+                        {"match_all": {}},
+                        {
+                            "range": {
+                                "timestamp": {
+                                    "gte": "now/d",  # เริ่มต้นวันนี้
+                                    "lte": "now", 
+                                    "format": "strict_date_optional_time"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+
+        # ส่งคำขอไปยัง Elasticsearch
+        response = requests.post(
+            ES_URL,
+            auth=(ES_USERNAME, ES_PASSWORD),
+            headers={"Content-Type": "application/json"},
+            data=json.dumps(query),
+            verify=False  # ปิด SSL Verification หากจำเป็น
+        )
+
+        response.raise_for_status()
+
+        # แยกผลลัพธ์จาก Elasticsearch
+        data = response.json()
+        buckets = data.get("aggregations", {}).get("2", {}).get("buckets", [])
+
+        # จัดข้อมูลสำหรับการส่งกลับ
+        top_descriptions = [
+            {"rule_description": bucket["key"], "count": bucket["doc_count"]}
+            for bucket in buckets
+        ]
+
+        return jsonify(top_descriptions)
+
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": f"Error fetching top rule descriptions: {e}"}), 500
+
+
 
 
 if __name__ == "__main__":
