@@ -3,10 +3,27 @@ import $ from 'jquery';
 let isHidden = true; // Tracks visibility of container-item
 let isAnimating = false; // Prevents repeated animations during a single click
 
+function getResponsiveMarginTopOFClassification() {
+  if (window.innerWidth >= 1920) {
+    return "280px"; // สำหรับหน้าจอ 1920px
+  } else if (window.innerWidth >= 1440) {
+    return "250px"; // สำหรับหน้าจอ 1440px
+  } else {
+    return "230px"; // ค่ามาตรฐานสำหรับหน้าจออื่นๆ
+  }
+}
+
 export const setupClassificationAnimation = () => {
-  $(".Classification").click(function () {
+  $(".Classification").click(function (e) {
+    // ตรวจสอบว่าคลิกที่ปุ่ม .btnOfSwitch หรือไม่
+    if ($(e.target).hasClass("btnOfSwitch")) {
+      return; // ไม่ทำงาน animation ถ้าคลิกที่ปุ่ม
+    }
+
     if (isAnimating) return; // Prevent additional clicks during animation
     isAnimating = true;
+
+    const marginTopValue = getResponsiveMarginTopOFClassification();
 
     if (isHidden) {
       // Hide container-item and move Classification down
@@ -17,29 +34,25 @@ export const setupClassificationAnimation = () => {
         },
         100,
         () => {
-          isAnimating = false; // Allow new animation after completion
+          isAnimating = false;
         }
       );
       $(".Classification").animate(
         {
-          marginTop: "230px",
+          marginTop: marginTopValue,
         },
         100
       );
-      $(".Arrow").css({
-        transform: "rotate(-180deg)",
-      });
     } else {
       // Show container-item and move Classification up
       $(".container-item").animate(
         {
           marginBottom: "0px",
           opacity: 1,
-          transition: "0.3s"
         },
         10,
         () => {
-          isAnimating = false; // Allow new animation after completion
+          isAnimating = false;
         }
       );
       $(".Classification").animate(
@@ -48,23 +61,8 @@ export const setupClassificationAnimation = () => {
         },
         100
       );
-      // Change Arrow rotation for visible state
-      $(".Arrow").css({
-        transform: "rotate(0deg)",
-      });
     }
 
     isHidden = !isHidden; // Toggle visibility state
-  });
-  $(".Classification").mouseenter(function () {
-    $(".Arrow").css({
-      color: "#00bcd4", // Optional: Change color on hover
-    });
-  });
-
-  $(".Classification").mouseleave(function () {
-    $(".Arrow").css({
-      color: "", // Reset color on mouse leave
-    });
   });
 };

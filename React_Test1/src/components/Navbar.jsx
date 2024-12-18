@@ -2,15 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './css/Navbar.css';
 import logo from '../assets/image.png';
+import Count_Attack from './Count_Attack';
 
 function Navbar() {
   return (
     <div className="navbar">
       {/* Logo Section */}
       <div className="navbar-logo">
-        <a href="https://ruk-com.cloud/">
-          <img src={logo} alt="Ruk-Com Logo"/>
-        </a>
+        <img src={logo} alt="Ruk-Com Logo" />
+        <h1>Cyber Attacker Map</h1>
       </div>
         <h1>Cyber Map Attacker</h1>
 

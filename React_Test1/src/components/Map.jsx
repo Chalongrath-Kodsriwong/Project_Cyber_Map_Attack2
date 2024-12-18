@@ -58,9 +58,8 @@ const Map = () => {
 
     const svg = d3
       .select(mapRef.current)
-      .attr("viewBox", `20 42 ${width} ${height}`)
-      .attr("preserveAspectRatio", "xMidYMid meet")
-      // .style("background-color", "#0a0f1c");
+      .attr("viewBox", `0 40 ${width} ${height}`)
+      .attr("preserveAspectRatio", "xMidYMid meet");
 
     const projection = d3
       .geoNaturalEarth1()

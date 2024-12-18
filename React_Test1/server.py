@@ -6,22 +6,10 @@ from datetime import datetime, timedelta
 from collections import Counter
 app = Flask(__name__)
 CORS(app)
-from datetime import datetime, timedelta
-from dotenv import load_dotenv
-import os
 
-# เวลาปัจจุบันใน UTC
-now = datetime.utcnow()
-
-# คำนวณเที่ยงคืนของวันก่อนหน้า ("now-1d/d")
-yesterday_midnight = (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-
-
-# Elasticsearch Configuration
-ES_URL = os.getenv("ES_URL")
-ES_URL2 = os.getenv("ES_URL2")
-ES_USERNAME = os.getenv("ES_USERNAME")
-ES_PASSWORD = os.getenv("ES_PASSWORD")
+ES_URL = "https://210.246.200.160:9200/wazuh-alerts*/_search"
+ES_USERNAME = "admin"
+ES_PASSWORD = "ITULgIHEhZHb8vxX+"
 
 @app.route("/api/alerts", methods=["GET"])
 def get_alerts():
@@ -724,115 +712,7 @@ def get_mitre_alert():
         return jsonify(hits)
 
     except requests.exceptions.RequestException as e:
-        return jsonify({"error": f"Error fetching MITRE alert: {e}"}), 500
-
-# Count log
-@app.route("/api/mitre_techniques", methods=["GET"])
-def get_mitre_techniques():
-    try:
-        query = {
-            "size": 0,
-            "aggs": {
-                "mitre_techniques": {
-                    "terms": {
-                        "field": "rule.mitre.technique",
-                        "size": 20
-                    }
-                }
-            }
-        }
-
-        response = requests.post(
-            ES_URL,
-            auth=(ES_USERNAME, ES_PASSWORD),
-            headers={"Content-Type": "application/json"},
-            data=json.dumps(query),
-            verify=False
-        )
-
-        response.raise_for_status()
-
-        data = response.json()
-        aggregations = data.get("aggregations", {}).get("mitre_techniques", {}).get("buckets", [])
-
-        # Return the aggregated data
-        return jsonify(aggregations)
-
-    except requests.exceptions.RequestException as e:
-        return jsonify({"error": f"Error fetching MITRE techniques: {e}"}), 500
-
-
-
-
-@app.route("/api/today-attacks", methods=["GET"])
-def get_today_attacks():
-    """
-    ดึงข้อมูลการโจมตีของทุกประเทศที่เกิดขึ้นในวันนี้
-    """
-    try:
-        # Elasticsearch Query
-        query = {
-            "aggs": {
-                "2": {
-                    "terms": {
-                        "field": "GeoLocation.country_name",
-                        "order": {
-                            "_count": "desc"
-                        },
-                        "size": 10000  # ขยายขนาดเพื่อรวมทุกประเทศ
-                    }
-                }
-            },
-            "size": 0,
-            "stored_fields": ["*"],
-            "script_fields": {},
-            "docvalue_fields": [
-                {"field": "timestamp", "format": "date_time"}
-            ],
-            "_source": {"excludes": ["@timestamp"]},
-            "query": {
-                "bool": {
-                    "must": [],
-                    "filter": [
-                        {"match_all": {}},
-                        {
-                            "range": {
-                                "timestamp": {
-                                    "gte": "now/d",  # เริ่มต้นวันนี้
-                                    "lte": "now",   # จนถึงตอนนี้
-                                    "format": "strict_date_optional_time"
-                                }
-                            }
-                        }
-                    ]
-                }
-            }
-        }
-
-        # ส่งคำขอไปยัง Elasticsearch
-        response = requests.post(
-            ES_URL,
-            auth=(ES_USERNAME, ES_PASSWORD),
-            headers={"Content-Type": "application/json"},
-            data=json.dumps(query),
-            verify=False
-        )
-
-        # ตรวจสอบสถานะ HTTP
-        response.raise_for_status()
-
-        # ดึงข้อมูล JSON จาก Elasticsearch
-        data = response.json()
-        buckets = data.get("aggregations", {}).get("2", {}).get("buckets", [])
-
-        # แปลงข้อมูลสำหรับการตอบกลับ
-        results = [{"country": bucket["key"], "count": bucket["doc_count"]} for bucket in buckets]
-
-        return jsonify(results)
-
-    except requests.exceptions.RequestException as e:
-        return jsonify({"error": f"Error fetching today attacks: {e}"}), 500
-
+        return jsonify({"error": f"Error fetching alerts: {e}"}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)

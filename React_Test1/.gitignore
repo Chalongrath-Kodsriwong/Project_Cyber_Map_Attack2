@@ -29,3 +29,10 @@ dist-ssr
 # Ignore specific files
 server_Backup.py
 server_Backup2.py
+
+# Environment Variables
+.env
+
+# Ignore specific files
+server_Backup.py
+server_Backup2.py
